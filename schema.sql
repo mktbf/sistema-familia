@@ -1,5 +1,5 @@
--- ============================================================
---  CADERNO DA CASA — schema Supabase
+﻿-- ============================================================
+--  CADERNO DA CASA ÔÇö schema Supabase
 --  Cole tudo no SQL Editor do Supabase e rode uma vez.
 -- ============================================================
 
@@ -18,7 +18,7 @@ create table if not exists profiles (
   created_at    timestamptz not null default now()
 );
 
--- só guardamos as categorias personalizadas; as padrão ficam no app
+-- s├│ guardamos as categorias personalizadas; as padr├úo ficam no app
 create table if not exists categories (
   id            uuid primary key default gen_random_uuid(),
   household_id  uuid not null references households(id) on delete cascade,
@@ -34,7 +34,7 @@ create table if not exists transactions (
   space         text not null check (space in ('casa','pessoal')),
   type          text not null check (type in ('in','out')),
   amount        numeric(12,2) not null check (amount > 0),
-  category      text not null,            -- id da categoria padrão ou uuid da personalizada
+  category      text not null,            -- id da categoria padr├úo ou uuid da personalizada
   description   text not null default '',
   occurred_on   date not null default current_date,
   created_at    timestamptz not null default now()
@@ -43,8 +43,8 @@ create table if not exists transactions (
 create index if not exists idx_tx_house_date on transactions (household_id, occurred_on);
 create index if not exists idx_tx_user on transactions (user_id);
 
--- ---------- HELPER: a casa do usuário logado ----------
--- SECURITY DEFINER evita recursão de RLS ao ler profiles
+-- ---------- HELPER: a casa do usu├írio logado ----------
+-- SECURITY DEFINER evita recurs├úo de RLS ao ler profiles
 create or replace function my_household()
 returns uuid
 language sql
@@ -78,7 +78,7 @@ create trigger on_auth_user_created
   for each row execute function handle_new_user();
 
 -- ============================================================
---  RLS — o coração da privacidade
+--  RLS ÔÇö o cora├º├úo da privacidade
 -- ============================================================
 
 alter table households   enable row level security;
@@ -86,11 +86,11 @@ alter table profiles     enable row level security;
 alter table categories   enable row level security;
 alter table transactions enable row level security;
 
--- households: cada um vê só a própria casa
+-- households: cada um v├¬ s├│ a pr├│pria casa
 create policy "ver minha casa" on households
   for select using (id = my_household());
 
--- profiles: vejo os membros da minha casa (pra mostrar os nomes); edito só o meu
+-- profiles: vejo os membros da minha casa (pra mostrar os nomes); edito s├│ o meu
 create policy "ver perfis da casa" on profiles
   for select using (household_id = my_household() or id = auth.uid());
 create policy "editar meu perfil" on profiles
@@ -104,7 +104,7 @@ create policy "criar categorias" on categories
 create policy "apagar categorias" on categories
   for delete using (household_id = my_household());
 
--- transactions: CASA é visível à casa toda; PESSOAL só ao dono
+-- transactions: CASA ├® vis├¡vel ├á casa toda; PESSOAL s├│ ao dono
 create policy "ver transacoes" on transactions
   for select using (
     household_id = my_household()
@@ -121,7 +121,7 @@ create policy "apagar minhas transacoes" on transactions
   for delete using (user_id = auth.uid());
 
 -- ============================================================
---  VÍNCULO DO CASAL  ⚠️ rode SÓ DEPOIS que os dois já criaram conta no app
+--  V├ìNCULO DO CASAL  ÔÜá´©Å rode S├ô DEPOIS que os dois j├í criaram conta no app
 --  Cria uma casa e liga os dois perfis a ela.
 -- ============================================================
 -- do $$
@@ -132,7 +132,7 @@ create policy "apagar minhas transacoes" on transactions
 -- end $$;
 
 -- ============================================================
---  ATUALIZAÇÃO: Lixeira (soft delete)
+--  ATUALIZA├ç├âO: Lixeira (soft delete)
 --  Rode no SQL Editor do Supabase DEPOIS do schema principal.
 -- ============================================================
 ALTER TABLE transactions ADD COLUMN IF NOT EXISTS deleted_at timestamptz DEFAULT NULL;
