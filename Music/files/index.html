@@ -3728,8 +3728,9 @@ function renderForm(){
   }
   const payerRow=$('payerRow');
   if(payerRow){
-    payerRow.style.display = isCasa ? 'flex' : 'none';
-    if(isCasa) renderPayerChips();
+    const isJean = (state.me.name || '').toLowerCase().includes('jean');
+    payerRow.style.display = (isCasa && isJean) ? 'flex' : 'none';
+    if(isCasa && isJean) renderPayerChips();
   }
 }
 
