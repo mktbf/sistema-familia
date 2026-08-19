@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
+a charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#184A3C">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3440,6 +3437,10 @@ async function pasteNubankNotification() {
   showToast(`✅ ${merchant} — R$ ${amount.toFixed(2).replace('.', ',')} lançado!`, 'success');
   await loadTx();
   renderAll();
+  const form = document.getElementById("formSection");
+  const btn = document.getElementById("btnToggleForm");
+  if (form) form.classList.add("hidden");
+  if (btn) { btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Adicionar Lançamento`; btn.style.background = "var(--primary)"; btn.style.color = "#fff"; }
 }
 
 function addRecurrence(){
@@ -4576,6 +4577,7 @@ async function addTx(){
   renderPayerChips();
   
   const first=document.querySelector('#list .it');if(first)first.classList.add('flash');$('inAmount').focus();
+  cancelEdit();
 }
 
 async function removeTx(id){
@@ -4583,6 +4585,26 @@ async function removeTx(id){
   if(error){showToast('Erro ao excluir', 'error');return;}
   showToast('Enviado para a Lixeira.', 'success');
   await loadTx();renderAll();updateTrashBadge();updatePendingBanner();
+}
+
+function toggleForm(forceOpen = false) {
+  const form = document.getElementById("formSection");
+  const btn = document.getElementById("btnToggleForm");
+  if (!form || !btn) return;
+  
+  const isHidden = form.classList.contains("hidden");
+  if (isHidden || forceOpen) {
+    form.classList.remove("hidden");
+    btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Fechar formulário`;
+    btn.style.background = "var(--surface-2)";
+    btn.style.color = "var(--ink)";
+  } else {
+    form.classList.add("hidden");
+    btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Adicionar Lançamento`;
+    btn.style.background = "var(--primary)";
+    btn.style.color = "#fff";
+    cancelEdit();
+  }
 }
 
 function startEditTx(t){
@@ -4620,6 +4642,7 @@ function startEditTx(t){
   
   // Update button states
   $('cancelEditBtn').classList.remove('hidden');
+  toggleForm(true);
   
   // Scroll to form (instant on mobile to avoid keyboard focus collisions, smooth on desktop)
   const formBox = $('formTitle');
