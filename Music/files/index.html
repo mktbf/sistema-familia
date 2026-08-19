@@ -952,36 +952,39 @@
     color: var(--ink);
   }
   
-  .payer-chips {
+  .segment-control {
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: 12px;
+    position: relative;
+    width: 100%;
   }
-  .payer-chip {
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--line);
-    background: var(--surface);
+  .segment-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
     color: var(--ink-soft);
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 600;
     font-family: inherit;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    z-index: 1;
   }
-  .payer-chip:hover {
-    background: var(--surface-2);
+  .segment-btn:hover {
     color: var(--ink);
   }
-  .payer-chip.active {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+  .segment-btn.active {
+    color: var(--ink);
+    background: var(--surface);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   
   .list .it .badge {
@@ -2748,9 +2751,9 @@
       <span class="cur">R$</span>
       <input id="inAmount" inputmode="decimal" placeholder="0,00" autocomplete="off">
     </div>
-    <div class="field-row" id="payerRow" style="display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
-      <span style="font-size:13px; font-weight:600; color:var(--ink-soft); min-width:85px;">Quem pagou:</span>
-      <div id="payerChips" class="payer-chips"></div>
+    <div id="payerRow" style="display:none; margin-bottom:16px; margin-top:8px;">
+      <div style="font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:8px; margin-left:4px;">Quem pagou:</div>
+      <div id="payerChips" class="segment-control"></div>
     </div>
     <div class="chips" id="chips"></div>
     <div id="catFormBox"></div>
@@ -3691,8 +3694,8 @@ function renderPayerChips(){
     const name=state.members[uid]||(isMe?(state.me.name||'Você'):'Outro');
     const chip=document.createElement('button');
     chip.type='button';
-    chip.className='payer-chip'+(isSelected?' active':'');
-    chip.innerHTML=`${esc(name)}${isMe?' <span style="opacity:0.7;font-size:10px;">(Você)</span>':''}`;
+    chip.className='segment-btn'+(isSelected?' active':'');
+    chip.innerHTML=`${esc(name)}`;
     chip.onclick=()=>{
       state.selectedPayer=uid;
       renderPayerChips();
@@ -3729,7 +3732,7 @@ function renderForm(){
   const payerRow=$('payerRow');
   if(payerRow){
     const isJean = (state.me.name || '').toLowerCase().includes('jean');
-    payerRow.style.display = (isCasa && isJean) ? 'flex' : 'none';
+    payerRow.style.display = (isCasa && isJean) ? 'block' : 'none';
     if(isCasa && isJean) renderPayerChips();
   }
 }
