@@ -1,4 +1,7 @@
-a charset="UTF-8">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#184A3C">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2742,7 +2745,36 @@ a charset="UTF-8">
     <div class="people" id="peopleBox"></div>
   </section>
 
-  <section class="card reveal" style="animation-delay:.06s">
+  
+  <div style="padding: 0 4px; margin-bottom: 24px; margin-top: -8px;">
+    <button id="btnToggleForm" onclick="toggleForm()" style="width:100%; padding:14px; background:var(--primary); color:#fff; border-radius:12px; font-weight:700; font-size:15px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 12px rgba(99,102,241,0.25); transition:all 0.2s ease;">
+      <svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Adicionar Lançamento
+    </button>
+  </div>
+
+<section class="card reveal" style="animation-delay:.16s">
+    <h2 id="listTitle">Lançamentos <span class="hint" id="listCount"></span>
+      <button style="border:0;background:none;cursor:pointer;color:var(--ink-soft);padding:4px;border-radius:8px;transition:all .15s" id="exportBtn" title="Exportar CSV">
+        <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      </button>
+    </h2>
+    <div class="search-bar" id="searchBar">
+      <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px;color:var(--ink-soft);flex-shrink:0"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="searchInput" placeholder="Buscar lançamentos..." autocomplete="off">
+      <button class="clear-search" id="clearSearch">
+        <svg class="svg-icon" viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="filter-chips" id="filterChips">
+      <button class="filter-chip active" data-filter="all">Todos</button>
+      <button class="filter-chip" data-filter="out">Despesas</button>
+      <button class="filter-chip" data-filter="in">Receitas</button>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section id="formSection" class="card reveal hidden" style="animation-delay:.06s; margin-bottom:24px;">
     <h2 id="formTitle">Nova despesa da casa</h2>
     <div class="amount-row">
       <span class="cur">R$</span>
@@ -2870,26 +2902,7 @@ a charset="UTF-8">
     <button class="add-goal-btn" id="addGoalBtn" type="button">+ Nova meta de economia</button>
   </section>
 
-  <section class="card reveal" style="animation-delay:.16s">
-    <h2 id="listTitle">Lançamentos <span class="hint" id="listCount"></span>
-      <button style="border:0;background:none;cursor:pointer;color:var(--ink-soft);padding:4px;border-radius:8px;transition:all .15s" id="exportBtn" title="Exportar CSV">
-        <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-      </button>
-    </h2>
-    <div class="search-bar" id="searchBar">
-      <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px;color:var(--ink-soft);flex-shrink:0"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" id="searchInput" placeholder="Buscar lançamentos..." autocomplete="off">
-      <button class="clear-search" id="clearSearch">
-        <svg class="svg-icon" viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <div class="filter-chips" id="filterChips">
-      <button class="filter-chip active" data-filter="all">Todos</button>
-      <button class="filter-chip" data-filter="out">Despesas</button>
-      <button class="filter-chip" data-filter="in">Receitas</button>
-    </div>
-    <div class="list" id="list"></div>
-  </section>
+  
 
   <p class="foot">CasaCa$h &middot; Seus dados ficam no seu Supabase.</p>
 </div>
@@ -3437,10 +3450,6 @@ async function pasteNubankNotification() {
   showToast(`✅ ${merchant} — R$ ${amount.toFixed(2).replace('.', ',')} lançado!`, 'success');
   await loadTx();
   renderAll();
-  const form = document.getElementById("formSection");
-  const btn = document.getElementById("btnToggleForm");
-  if (form) form.classList.add("hidden");
-  if (btn) { btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Adicionar Lançamento`; btn.style.background = "var(--primary)"; btn.style.color = "#fff"; }
 }
 
 function addRecurrence(){
@@ -4655,6 +4664,7 @@ function startEditTx(t){
     }
   }
   $('inAmount').focus();
+  cancelEdit();
 }
 
 function cancelEdit(){
@@ -4669,6 +4679,10 @@ function cancelEdit(){
   renderCatForm();
   renderPayerChips();
   renderAll();
+  const form = document.getElementById("formSection");
+  const btn = document.getElementById("btnToggleForm");
+  if(form) form.classList.add("hidden");
+  if(btn) { btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Adicionar Lançamento`; btn.style.background = "var(--primary)"; btn.style.color = "#fff"; }
 }
 
 function switchView(v){
