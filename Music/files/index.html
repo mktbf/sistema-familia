@@ -4543,11 +4543,14 @@ async function addTx(){
       const parcDateStr = parcDate.toISOString().slice(0, 10);
       const parcDesc = desc ? `${desc} - Parc. ${i+1}/${installments}` : `Parc. ${i+1}/${installments}`;
       
+      const isLast = (i === installments - 1);
+      const finalAmt = isLast ? Math.round((amt - (parcAmt * (installments - 1))) * 100) / 100 : parcAmt;
+      
       rows.push({
         household_id: state.me.household,
         user_id: payerId,
         space, type,
-        amount: parcAmt,
+        amount: finalAmt,
         category: state.cat,
         description: parcDesc,
         occurred_on: parcDateStr,
