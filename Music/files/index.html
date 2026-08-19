@@ -946,11 +946,42 @@
   }
   
   .list .it.other-user {
-    opacity: 0.85;
     background: var(--surface-2);
   }
   .list .it.other-user .t1 {
+    color: var(--ink);
+  }
+  
+  .payer-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .payer-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: var(--surface);
     color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .payer-chip:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  .payer-chip.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
   }
   
   .list .it .badge {
@@ -2725,6 +2756,10 @@
     <div class="field-row">
       <input class="text" id="inDesc" placeholder="Descrição (opcional)" autocomplete="off">
     </div>
+    <div class="field-row" id="payerRow" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px;">
+      <span style="font-size:12.5px; font-weight:600; color:var(--ink-soft); min-width:76px;">Quem pagou:</span>
+      <div id="payerChips" class="payer-chips"></div>
+    </div>
     <div class="field-row" id="installmentRow" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px; color:var(--ink-soft); font-weight:600; user-select:none;">
         <input type="checkbox" id="installmentToggle" style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;">
@@ -3126,7 +3161,7 @@ const fmt=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDi
 const fmt0=n=>Math.round(n).toLocaleString('pt-BR');
 const esc=s=>(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
-let state={ tx:[], custom:[], members:{}, me:{id:null,name:'',household:null,webhook_token:null}, view:'casa', cat:"mercado", cursor:new Date(), adding:false, searchQuery:'', filterType:'all', budgets:{}, recurrences:[], goals:[], editingId:null };
+let state={ tx:[], custom:[], members:{}, me:{id:null,name:'',household:null,webhook_token:null}, view:'casa', cat:"mercado", cursor:new Date(), adding:false, searchQuery:'', filterType:'all', budgets:{}, recurrences:[], goals:[], editingId:null, selectedPayer:null };
 
 // Retornar apenas transações confirmadas (pending = false) para cálculos e estatísticas do app
 const confirmedTxList=()=>state.tx.filter(t=>!t.pending);
@@ -3639,8 +3674,36 @@ const sumv=rows=>rows.reduce((s,t)=>s+t.amount,0);
 ========================================================= */
 function renderViewTabs(){document.querySelectorAll('#viewTabs button').forEach(b=>b.className=(b.dataset.v===state.view)?'on':'');}
 
+function renderPayerChips(){
+  const box=$('payerChips');
+  if(!box) return;
+  box.innerHTML='';
+  const uids=Object.keys(state.members);
+  if(uids.length===0 && state.me.id){
+    uids.push(state.me.id);
+  }
+  if(!state.selectedPayer || !uids.includes(state.selectedPayer)){
+    state.selectedPayer=state.me.id;
+  }
+  uids.forEach(uid=>{
+    const isSelected=(state.selectedPayer===uid);
+    const isMe=(uid===state.me.id);
+    const name=state.members[uid]||(isMe?(state.me.name||'Você'):'Outro');
+    const chip=document.createElement('button');
+    chip.type='button';
+    chip.className='payer-chip'+(isSelected?' active':'');
+    chip.innerHTML=`${esc(name)}${isMe?' <span style="opacity:0.7;font-size:10px;">(Você)</span>':''}`;
+    chip.onclick=()=>{
+      state.selectedPayer=uid;
+      renderPayerChips();
+    };
+    box.appendChild(chip);
+  });
+}
+
 function renderForm(){
   const isBolso=state.view==='bolso';
+  const isCasa=state.view==='casa';
   if (state.editingId) {
     $('formTitle').textContent = 'Editar lançamento';
     const btn=$('addBtn'); btn.className='addbtn '+(isBolso?'in':'out');
@@ -3655,13 +3718,18 @@ function renderForm(){
     const titles={casa:'Nova despesa da casa',pessoais:'Nova despesa pessoal',bolso:'Nova receita (bolso)'};
     $('formTitle').textContent=titles[state.view];
     const btn=$('addBtn'); btn.className='addbtn '+(isBolso?'in':'out'); btn.textContent=isBolso?'Adicionar receita':'Adicionar gasto';
-    const notes={casa:'Entra como pago por você.',pessoais:'🔒 Só você vê seus gastos pessoais.',bolso:'🔒 Proventos e freelas ficam só no seu bolso.'};
+    const notes={casa:'Entra como despesa compartilhada da casa.',pessoais:'🔒 Só você vê seus gastos pessoais.',bolso:'🔒 Proventos e freelas ficam só no seu bolso.'};
     const note=$('formNote'); note.textContent=notes[state.view];
     // Parcelamento: só aparece em despesas (Casa e Pessoais), não em receita (Bolso)
     $('installmentRow').style.display = isBolso ? 'none' : 'flex';
     $('installmentToggle').checked = false;
     $('installmentFields').style.display = 'none';
     $('installmentInfo').textContent = '';
+  }
+  const payerRow=$('payerRow');
+  if(payerRow){
+    payerRow.style.display = isCasa ? 'flex' : 'none';
+    if(isCasa) renderPayerChips();
   }
 }
 
@@ -3822,8 +3890,11 @@ function renderList(){
     const c=catById(t.category);const isIn=t.type==='in';const d=new Date(t.date+'T12:00:00');const dstr=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
     const pin=(t.space==='pessoal')?`<span class="pin" title="Privado"><svg class="svg-icon" viewBox="0 0 24 24" style="width:8px;height:8px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>`:'';
     let sub; if(isIn)sub=esc(c.label)+' &middot; '+dstr; else if(t.space==='casa')sub='Casa &middot; '+esc(nameOf(t.user_id))+' &middot; '+dstr; else sub=esc(c.label)+' &middot; pessoal &middot; '+dstr;
-    const canDel=(t.user_id===mineId());
-    const isOther = (t.space === 'casa' && !canDel);
+    const isOwner = (t.user_id === mineId());
+    const isCasa = (t.space === 'casa');
+    const canEdit = (isCasa || isOwner);
+    const canDel = (isCasa || isOwner);
+    const isOther = (isCasa && !isOwner);
     const isEditing = (state.editingId === t.id);
     const it=document.createElement('div');
     it.className='it' + (isEditing ? ' editing' : '') + (isOther ? ' other-user' : '');
@@ -3843,6 +3914,8 @@ function renderList(){
         ev.stopPropagation();
         removeTx(t.id);
       };
+    }
+    if(canEdit) {
       it.onclick=()=>startEditTx(t);
     } else {
       it.style.cursor = 'default';
@@ -4421,18 +4494,24 @@ async function addTx(){
   const dateStr=$('inDate').value||new Date().toISOString().slice(0,10);
   const isInstallment = $('installmentToggle').checked && !state.editingId;
   const installments = isInstallment ? parseInt($('installmentCount').value) : 1;
+  const payerId = (space === 'casa' && state.selectedPayer) ? state.selectedPayer : state.me.id;
   
   $('addBtn').disabled=true;
   
   if (state.editingId) {
     // Modo edição — sem parcelamento
-    const {error} = await sb.from('transactions').update({
+    const updatePayload = {
       space, type, amount: amt, category: state.cat, description: desc, occurred_on: dateStr
-    }).eq('id', state.editingId);
+    };
+    if (space === 'casa') {
+      updatePayload.user_id = payerId;
+    }
+    const {error} = await sb.from('transactions').update(updatePayload).eq('id', state.editingId);
     $('addBtn').disabled=false;
     if(error){showToast('Erro ao salvar: '+error.message, 'error');return;}
     showToast('Lançamento atualizado!', 'success');
     state.editingId = null;
+    state.selectedPayer = state.me.id;
     $('cancelEditBtn').classList.add('hidden');
   } else if (installments > 1) {
     // Parcelamento — divide valor e cria N lançamentos
@@ -4452,7 +4531,7 @@ async function addTx(){
       
       rows.push({
         household_id: state.me.household,
-        user_id: state.me.id,
+        user_id: payerId,
         space, type,
         amount: parcAmt,
         category: state.cat,
@@ -4471,7 +4550,7 @@ async function addTx(){
     // Lançamento normal (sem parcelamento)
     const row = {
       household_id: state.me.household,
-      user_id: state.me.id,
+      user_id: payerId,
       space, type, amount: amt, category: state.cat,
       description: desc, occurred_on: dateStr, pending: false
     };
@@ -4486,9 +4565,11 @@ async function addTx(){
   $('installmentToggle').checked=false;
   $('installmentFields').style.display='none';
   $('installmentInfo').textContent='';
+  state.selectedPayer = state.me.id;
   
   await loadTx();
   renderAll();
+  renderPayerChips();
   
   const first=document.querySelector('#list .it');if(first)first.classList.add('flash');$('inAmount').focus();
 }
@@ -4512,6 +4593,7 @@ function startEditTx(t){
   
   state.view = view;
   state.cat = t.category;
+  state.selectedPayer = t.user_id || state.me.id;
   
   // Update the entire UI state (tab headers, list, category breakdown, charts)
   renderAll();
@@ -4525,6 +4607,7 @@ function startEditTx(t){
   renderForm();
   renderChips();
   renderCatForm();
+  renderPayerChips();
   
   // Load values
   $('inAmount').value = fmt(t.amount);
@@ -4549,6 +4632,7 @@ function startEditTx(t){
 
 function cancelEdit(){
   state.editingId = null;
+  state.selectedPayer = state.me.id;
   $('inAmount').value = '';
   $('inDesc').value = '';
   $('inDate').value = '';
@@ -4556,6 +4640,7 @@ function cancelEdit(){
   renderForm();
   renderChips();
   renderCatForm();
+  renderPayerChips();
   renderAll();
 }
 
@@ -4564,10 +4649,12 @@ function switchView(v){
   state.view=v;
   state.adding=false;
   state.cat=currentCats()[0].id;
+  state.selectedPayer = state.me.id;
   renderViewTabs();
   renderForm();
   renderChips();
   renderCatForm();
+  renderPayerChips();
   renderAll();
 }
 
