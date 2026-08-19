@@ -2748,6 +2748,10 @@
       <span class="cur">R$</span>
       <input id="inAmount" inputmode="decimal" placeholder="0,00" autocomplete="off">
     </div>
+    <div class="field-row" id="payerRow" style="display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+      <span style="font-size:13px; font-weight:600; color:var(--ink-soft); min-width:85px;">Quem pagou:</span>
+      <div id="payerChips" class="payer-chips"></div>
+    </div>
     <div class="chips" id="chips"></div>
     <div id="catFormBox"></div>
     <div class="field-row">
@@ -2755,10 +2759,6 @@
     </div>
     <div class="field-row">
       <input class="text" id="inDesc" placeholder="Descrição (opcional)" autocomplete="off">
-    </div>
-    <div class="field-row" id="payerRow" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px;">
-      <span style="font-size:12.5px; font-weight:600; color:var(--ink-soft); min-width:76px;">Quem pagou:</span>
-      <div id="payerChips" class="payer-chips"></div>
     </div>
     <div class="field-row" id="installmentRow" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px; color:var(--ink-soft); font-weight:600; user-select:none;">
