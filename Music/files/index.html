@@ -4520,13 +4520,29 @@ async function addTx(){
     if (space === 'casa') {
       updatePayload.user_id = payerId;
     }
-    const {error} = await sb.from('transactions').update(updatePayload).eq('id', state.editingId);
-    $('addBtn').disabled=false;
-    if(error){showToast('Erro ao salvar: '+error.message, 'error');return;}
-    showToast('Lançamento atualizado!', 'success');
-    state.editingId = null;
-    state.selectedPayer = state.me.id;
-    $('cancelEditBtn').classList.add('hidden');
+    try {
+      const { data, error } = await sb.from('transactions').update(updatePayload).eq('id', state.editingId).select();
+      $('addBtn').disabled=false;
+      if(error){showToast('Erro ao salvar: '+error.message, 'error');return;}
+      if(!data || data.length === 0){showToast('Erro: sem permissão para editar (RLS) ou excluído.', 'error');return;}
+      
+      showToast('Lançamento atualizado!', 'success');
+      state.editingId = null;
+      state.selectedPayer = state.me.id;
+      $('cancelEditBtn').classList.add('hidden');
+      
+      state.cursor=new Date(dateStr+'T12:00:00');
+      await loadTx();
+      renderAll();
+      renderPayerChips();
+      cancelEdit();
+      return;
+    } catch (err) {
+      $('addBtn').disabled=false;
+      showToast('Erro inesperado: ' + err.message, 'error');
+      console.error(err);
+      return;
+    }
   } else if (installments > 1) {
     // Parcelamento — divide valor e cria N lançamentos
     const parcAmt = Math.round((amt / installments) * 100) / 100; // arredondar centavos
@@ -4588,8 +4604,17 @@ async function addTx(){
   renderAll();
   renderPayerChips();
   
-  const first=document.querySelector('#list .it');if(first)first.classList.add('flash');$('inAmount').focus();
-  cancelEdit();
+  const first=document.querySelector('#list .it');if(first)first.classList.add('flash');
+  // Fechar formulário limpo após adicionar
+  $('inDate').value = new Date().toISOString().slice(0, 10);
+  const formEl = document.getElementById("formSection");
+  const toggleBtn = document.getElementById("btnToggleForm");
+  if(formEl) formEl.classList.add("hidden");
+  if(toggleBtn) {
+    toggleBtn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Adicionar Lançamento`;
+    toggleBtn.style.background = "var(--primary)";
+    toggleBtn.style.color = "#fff";
+  }
 }
 
 async function removeTx(id){
@@ -4610,6 +4635,19 @@ function toggleForm(forceOpen = false) {
     btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Fechar formulário`;
     btn.style.background = "var(--surface-2)";
     btn.style.color = "var(--ink)";
+    // Garantir que a data esteja setada ao abrir o formulário
+    if (!$('inDate').value) {
+      $('inDate').value = new Date().toISOString().slice(0, 10);
+    }
+    // Render form elements para o view atual
+    renderForm();
+    renderChips();
+    renderPayerChips();
+    // Scroll suave até o formulário e focar no valor
+    setTimeout(() => {
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('inAmount').focus();
+    }, 100);
   } else {
     form.classList.add("hidden");
     btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Adicionar Lançamento`;
@@ -4674,7 +4712,7 @@ function cancelEdit(){
   state.selectedPayer = state.me.id;
   $('inAmount').value = '';
   $('inDesc').value = '';
-  $('inDate').value = '';
+  $('inDate').value = new Date().toISOString().slice(0, 10);
   $('cancelEditBtn').classList.add('hidden');
   renderForm();
   renderChips();
