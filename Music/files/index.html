@@ -3595,12 +3595,26 @@ function renderList(){
   // Apply search filter
   if (state.searchQuery) {
     const q = state.searchQuery.toLowerCase();
-    rows = rows.filter(t => {
-      const desc = (t.description || '').toLowerCase();
-      const cat = catById(t.category).label.toLowerCase();
-      const amt = fmt(t.amount);
-      return desc.includes(q) || cat.includes(q) || amt.includes(q);
-    });
+    if (q.startsWith('[ia]') && window.currentMerchantFilter) {
+       rows = rows.filter(t => {
+          const tDesc = normalizeMerchant(t.description, t.category);
+          let found = false;
+          for (let k of window.currentMerchantFilter) {
+             if (k === tDesc || similarityScore(tDesc, k) >= 0.66) { found = true; break; }
+          }
+          return found;
+       });
+    } else {
+      window.currentMerchantFilter = null; // Clear if manual search
+      rows = rows.filter(t => {
+        const desc = (t.description || '').toLowerCase();
+        const cat = catById(t.category).label.toLowerCase();
+        const amt = fmt(t.amount);
+        return desc.includes(q) || cat.includes(q) || amt.includes(q);
+      });
+    }
+  } else {
+    window.currentMerchantFilter = null;
   }
   
   // Apply type filter
@@ -3805,6 +3819,8 @@ function filterByMerchantGroup(keysStr, displayName) {
   const searchInput = $('searchInput');
   if (searchInput) {
     searchInput.value = `[IA] ${displayName}`;
+    state.searchQuery = `[IA] ${displayName}`;
+    $('clearSearch').style.display = 'block';
   }
   
   const listCol = $('listCollapsible');
@@ -3814,7 +3830,7 @@ function filterByMerchantGroup(keysStr, displayName) {
     if(chevron) chevron.style.transform = 'rotate(0deg)';
   }
   
-  renderAll();
+  renderAll(); // Re-renders stats, merchants, and list
   
   const listSec = $('listSection');
   if (listSec) {
