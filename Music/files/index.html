@@ -2739,7 +2739,7 @@
     <h2 id="listTitle" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">
       <div style="display:flex; align-items:center; gap:8px;">
         <svg id="listChevron" class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px;transition:transform 0.3s;transform:rotate(-90deg);"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        Lançamentos <span class="hint" id="listCount"></span>
+        <span id="listTitleText">Lançamentos </span><span class="hint" id="listCount"></span>
       </div>
       <button style="border:0;background:none;cursor:pointer;color:var(--ink-soft);padding:4px;border-radius:8px;transition:all .15s" id="exportBtn" title="Exportar CSV">
         <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -3515,7 +3515,7 @@ function renderList(){
     rows = rows.filter(t => t.type === state.filterType);
   }
   
-  $('listTitle').firstChild.textContent=state.view==='bolso'?'Entradas e saídas ':'Lançamentos ';
+  $('listTitleText').textContent=state.view==='bolso'?'Entradas e saídas ':'Lançamentos ';
   $('listCount').textContent=rows.length?rows.length+(rows.length>1?' itens':' item'):'';
   const box=$('list');
   if(!rows.length){
