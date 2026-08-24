@@ -2893,9 +2893,11 @@
   </section>
 
   <section class="card reveal" style="animation-delay:.10s">
-    <h2 class="section-toggle" data-target="statsCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
-      <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      Resultados do mês
+    <h2 class="section-toggle" data-target="statsCollapsible" style="cursor:pointer; user-select:none;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        Resultados do mês
+      </div>
     </h2>
     <div id="statsCollapsible" class="collapsible-body" style="display:none;">
       <div class="stats" id="stats"></div>
@@ -2903,9 +2905,11 @@
   </section>
 
   <section class="card reveal" style="animation-delay:.13s">
-    <h2 id="bdTitle" class="section-toggle" data-target="breakdownCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
-      <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      <span id="bdTitleText">Despesas por categoria</span>
+    <h2 id="bdTitle" class="section-toggle" data-target="breakdownCollapsible" style="cursor:pointer; user-select:none;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        <span id="bdTitleText">Despesas por categoria</span>
+      </div>
     </h2>
     <div id="breakdownCollapsible" class="collapsible-body" style="display:none;">
       <div class="breakdown" id="breakdown"></div>
@@ -2913,9 +2917,11 @@
   </section>
 
   <section class="card reveal" style="animation-delay:.145s">
-    <h2 class="section-toggle" data-target="trendCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
-      <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      Tendência de 6 meses
+    <h2 class="section-toggle" data-target="trendCollapsible" style="cursor:pointer; user-select:none;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        Tendência de 6 meses
+      </div>
     </h2>
     <div id="trendCollapsible" class="collapsible-body" style="display:none;">
       <div class="trend-chart" id="trendChart"></div>
