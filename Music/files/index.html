@@ -2651,6 +2651,60 @@
     gap: 8px;
     margin-bottom: 18px;
   }
+
+  /* ----- COLLAPSIBLE SECTIONS ----- */
+  .section-toggle { margin-bottom: 0; }
+  .collapsible-body { margin-top: 16px; }
+  .chevron-icon { color: var(--ink-soft); }
+
+  /* ----- TOP MERCHANTS ----- */
+  .merchant-list { display:flex; flex-direction:column; gap:14px; }
+  .merchant-row {
+    display:flex; flex-direction:column; gap:6px;
+    padding:12px 14px; border-radius:14px;
+    background:var(--surface-2); border:1px solid var(--line);
+    transition: background .15s;
+  }
+  .merchant-row:hover { background: var(--surface); }
+  .merchant-top {
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .merchant-name {
+    font-weight:600; font-size:14px; color:var(--ink);
+    display:flex; align-items:center; gap:6px;
+  }
+  .merchant-rank {
+    font-size:11px; font-weight:700; color:var(--ink-soft);
+    background:var(--surface); border-radius:6px;
+    width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+  }
+  .merchant-amount { font-weight:700; font-size:15px; color:var(--out); font-family:'Outfit',sans-serif; }
+  .merchant-meta {
+    display:flex; align-items:center; gap:8px;
+    font-size:11.5px; color:var(--ink-soft); flex-wrap:wrap;
+  }
+  .merchant-badge {
+    font-size:10px; font-weight:700; padding:2px 7px;
+    border-radius:6px; display:inline-flex; align-items:center; gap:2px;
+  }
+  .merchant-badge.up { background:rgba(239,68,68,0.15); color:#EF4444; }
+  .merchant-badge.down { background:rgba(34,197,94,0.15); color:#22C55E; }
+  .merchant-badge.new { background:rgba(139,92,246,0.15); color:#8B5CF6; }
+  .merchant-badge.same { background:rgba(148,163,184,0.12); color:var(--ink-soft); }
+  .merchant-bar {
+    height:6px; border-radius:3px; background:var(--line); overflow:hidden;
+  }
+  .merchant-bar-fill {
+    height:100%; border-radius:3px;
+    background:linear-gradient(90deg, var(--primary), var(--primary-soft, #6366F1));
+    transition: width .4s ease;
+  }
+  .merchant-recur { font-size:10px; }
+  .merchant-summary {
+    text-align:center; font-size:12px; color:var(--ink-soft);
+    padding:10px 0 0; border-top:1px solid var(--line); margin-top:4px;
+  }
+
 </style>
 </head>
 <body>
@@ -2820,19 +2874,45 @@
     </button>
   </section>
 
+  <section class="card reveal" style="animation-delay:.08s">
+    <h2 class="section-toggle" data-target="merchantsCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
+      <svg class="chevron-icon svg-icon rotated" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(0deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      <span>📊 Onde mais gastou</span>
+      <span class="hint" id="merchantCount"></span>
+    </h2>
+    <div id="merchantsCollapsible" class="collapsible-body" style="display:block;">
+      <div id="topMerchants"></div>
+    </div>
+  </section>
+
   <section class="card reveal" style="animation-delay:.10s">
-    <h2>Resultados do mês</h2>
-    <div class="stats" id="stats"></div>
+    <h2 class="section-toggle" data-target="statsCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
+      <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      Resultados do mês
+    </h2>
+    <div id="statsCollapsible" class="collapsible-body" style="display:none;">
+      <div class="stats" id="stats"></div>
+    </div>
   </section>
 
   <section class="card reveal" style="animation-delay:.13s">
-    <h2 id="bdTitle">Despesas por categoria</h2>
-    <div class="breakdown" id="breakdown"></div>
+    <h2 id="bdTitle" class="section-toggle" data-target="breakdownCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
+      <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      <span id="bdTitleText">Despesas por categoria</span>
+    </h2>
+    <div id="breakdownCollapsible" class="collapsible-body" style="display:none;">
+      <div class="breakdown" id="breakdown"></div>
+    </div>
   </section>
 
   <section class="card reveal" style="animation-delay:.145s">
-    <h2>Tendência de 6 meses</h2>
-    <div class="trend-chart" id="trendChart"></div>
+    <h2 class="section-toggle" data-target="trendCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
+      <svg class="chevron-icon svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(-90deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      Tendência de 6 meses
+    </h2>
+    <div id="trendCollapsible" class="collapsible-body" style="display:none;">
+      <div class="trend-chart" id="trendChart"></div>
+    </div>
   </section>
   <p class="foot">CasaCa$h &middot; Seus dados ficam no seu Supabase.</p>
 </div>
@@ -3472,7 +3552,7 @@ function renderStats(){
 }
 
 function renderBreakdown(){
-  $('bdTitle').textContent=state.view==='bolso'?'Para onde o dinheiro foi':'Despesas por categoria';
+  $('bdTitleText').textContent=state.view==='bolso'?'Para onde o dinheiro foi':'Despesas por categoria';
   const rows=expenseRows();const total=sumv(rows);const byCat={};rows.forEach(t=>byCat[t.category]=(byCat[t.category]||0)+t.amount);
   const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);const box=$('breakdown');
   if(!sorted.length){
@@ -3615,11 +3695,142 @@ async function discardPendingTx(id) {
   }, 250);
 }
 
+
+/* ----- COLLAPSIBLE SECTION TOGGLE ----- */
+function toggleSection(targetId, chevronEl) {
+  const body = $(targetId);
+  if (!body) return;
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (chevronEl) {
+    chevronEl.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+  }
+}
+
+/* ----- TOP MERCHANTS ANALYSIS ----- */
+function normalizeMerchant(desc) {
+  if (!desc) return 'sem descrição';
+  let d = desc.trim();
+  // Remove installment suffixes
+  d = d.replace(/\s*[-–]\s*Parc\.?\s*\d+\/\d+/gi, '');
+  d = d.replace(/\s*[-–]\s*Parcela\s*\d+\/\d+/gi, '');
+  d = d.replace(/\s*\(Parc\.?\s*\d+\/\d+\)/gi, '');
+  d = d.trim().toLowerCase();
+  // Collapse multiple spaces
+  d = d.replace(/\s+/g, ' ');
+  return d || 'sem descrição';
+}
+
+function renderTopMerchants() {
+  const box = $('topMerchants');
+  if (!box) return;
+  
+  const rows = expenseRows();
+  if (!rows.length) {
+    box.innerHTML = '<div style="text-align:center;color:var(--ink-soft);padding:20px;font-size:13px;">Nenhuma despesa neste mês.</div>';
+    $('merchantCount').textContent = '';
+    return;
+  }
+  
+  const total = sumv(rows);
+  
+  // Group current month by merchant
+  const byMerchant = {};
+  rows.forEach(t => {
+    const key = normalizeMerchant(t.description);
+    if (!byMerchant[key]) byMerchant[key] = { amount: 0, count: 0, original: t.description || 'Sem descrição' };
+    byMerchant[key].amount += t.amount;
+    byMerchant[key].count++;
+    // Keep the best-looking original name (longest)
+    if ((t.description || '').length > byMerchant[key].original.length) {
+      byMerchant[key].original = t.description;
+    }
+  });
+  
+  // Get previous month data for comparison
+  const prev = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - 1, 1);
+  const prevYm = prev.getFullYear() + '-' + String(prev.getMonth() + 1).padStart(2, '0');
+  const prevRows = confirmedTxList().filter(t => t.date.slice(0, 7) === prevYm && t.type === 'out');
+  
+  let prevFilter;
+  if (state.view === 'casa') {
+    prevFilter = prevRows.filter(t => t.space === 'casa');
+  } else if (state.view === 'pessoais') {
+    prevFilter = prevRows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
+  } else {
+    prevFilter = prevRows.filter(t => t.user_id === state.me.id);
+  }
+  
+  const prevByMerchant = {};
+  prevFilter.forEach(t => {
+    const key = normalizeMerchant(t.description);
+    if (!prevByMerchant[key]) prevByMerchant[key] = { amount: 0, count: 0 };
+    prevByMerchant[key].amount += t.amount;
+    prevByMerchant[key].count++;
+  });
+  
+  // Sort by amount desc, top 10
+  const sorted = Object.entries(byMerchant)
+    .sort((a, b) => b[1].amount - a[1].amount)
+    .slice(0, 10);
+  
+  $('merchantCount').textContent = sorted.length + ' maiores';
+  
+  let html = '<div class="merchant-list">';
+  sorted.forEach(([key, data], i) => {
+    const pct = total > 0 ? (data.amount / total * 100) : 0;
+    const prev = prevByMerchant[key];
+    
+    // Clean display name (capitalize first letter of each word)
+    let displayName = data.original;
+    // Remove installment suffix from display too
+    displayName = displayName.replace(/\s*[-–]\s*Parc\.?\s*\d+\/\d+/gi, '').trim();
+    
+    // Comparison badge
+    let badge = '';
+    if (prev) {
+      const diff = ((data.amount - prev.amount) / prev.amount * 100);
+      if (Math.abs(diff) < 1) {
+        badge = '<span class="merchant-badge same">= igual</span>';
+      } else if (diff > 0) {
+        badge = '<span class="merchant-badge up">↑' + Math.round(diff) + '%</span>';
+      } else {
+        badge = '<span class="merchant-badge down">↓' + Math.abs(Math.round(diff)) + '%</span>';
+      }
+    } else {
+      badge = '<span class="merchant-badge new">NOVO</span>';
+    }
+    
+    // Recurrence icon
+    const isRecurring = prev ? ' 🔄' : '';
+    
+    html += '<div class="merchant-row">';
+    html += '  <div class="merchant-top">';
+    html += '    <div class="merchant-name"><span class="merchant-rank">' + (i + 1) + '</span>' + esc(displayName) + isRecurring + '</div>';
+    html += '    <div class="merchant-amount">R$ ' + fmt(data.amount) + '</div>';
+    html += '  </div>';
+    html += '  <div class="merchant-meta">';
+    html += '    <span>' + data.count + 'x este mês</span>';
+    html += '    <span>·</span>';
+    html += '    <span>' + pct.toFixed(0) + '% do total</span>';
+    html += '    ' + badge;
+    html += '  </div>';
+    html += '  <div class="merchant-bar"><div class="merchant-bar-fill" style="width:' + pct + '%"></div></div>';
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  html += '<div class="merchant-summary">Top ' + sorted.length + ' · Total R$ ' + fmt(total) + '</div>';
+  box.innerHTML = html;
+}
+
+
 function renderAll(){
   renderMonth();
   renderHero();
   renderStats();
   renderBreakdown();
+  renderTopMerchants();
   renderTrendChart();
   renderRecurrences();
   renderList();
@@ -4682,7 +4893,16 @@ window.addEventListener('DOMContentLoaded',async()=>{
     content.style.display = isHidden ? 'block' : 'none';
     chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
   };
-  let searchTimeout;
+  // Generic collapsible section toggles
+  document.querySelectorAll('.section-toggle').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      const targetId = h2.dataset.target;
+      const chevron = h2.querySelector('.chevron-icon');
+      toggleSection(targetId, chevron);
+    });
+  });
+
+    let searchTimeout;
   $('searchInput').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
     const val = e.target.value;
