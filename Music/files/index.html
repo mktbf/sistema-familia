@@ -4624,7 +4624,7 @@ async function boot(){
   $('appLoading').classList.add('hidden');showApp();
   $('inDate').value=new Date().toISOString().slice(0,10);
   $('currentUser').textContent=state.me.name;
-  loadBudgets();loadRecurrences();loadGoals();
+  loadBudgets();loadRecurrences();
   renderViewTabs();
   renderPayerChips();
   renderAll();
