@@ -2703,12 +2703,7 @@
     
     <div class="who-tag">
       <span>Você é <b id="currentUser">&mdash;</b> &middot; Pessoais e Meu bolso ficam privados</span>
-      <div class="right-actions">
-        <button class="trash-btn" id="aiBtn" style="color:var(--primary-soft)">
-          <svg class="svg-icon" viewBox="0 0 24 24" style="margin-top:-2px"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-          Assistente IA
-        </button>
-        <button class="trash-btn" id="trashBtn">
+      <div class="right-actions"> <button class="trash-btn" id="trashBtn">
           <svg class="svg-icon" viewBox="0 0 24 24" style="margin-top:-2px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           Lixeira <span class="badge-count hidden" id="trashBadge">0</span>
         </button>
@@ -2727,14 +2722,6 @@
   </header>
 
   <!-- Fila de Pendentes Banner -->
-  <div id="pendingBanner" class="hidden">
-    <span style="font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px">
-      <svg class="svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></svg>
-      Você tem <span id="pendingCount" style="font-weight:800">0</span> gasto(s) pendente(s) de classificação.
-    </span>
-    <button id="btnReviewPending">Revisar agora</button>
-  </div>
-
   <section class="hero reveal" style="animation-delay:.02s">
     <div class="cap" id="heroCap">Gasto da casa</div>
     <div class="total num"><small>R$</small><span id="heroBig">0</span></div>
@@ -2820,18 +2807,10 @@
       <button class="addbtn out" id="addBtn" style="margin:0;flex:1">Adicionar gasto</button>
       <button class="addbtn out hidden" id="cancelEditBtn" type="button" style="margin:0;background:var(--ink-soft);flex:1">Cancelar</button>
     </div>
-    <button class="paste-notif-btn" id="pasteNotifBtn" type="button">
-      <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px;margin-right:6px"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-      Colar Notificação
-    </button>
     <div id="recurrenceBox"></div>
     <div style="display:flex; gap:12px; width:100%; margin-top:10px;">
       <button class="add-recurrence-btn" id="addRecurrenceBtn" type="button" style="margin:0; flex:1;">
         + Adicionar conta fixa
-      </button>
-      <button class="add-recurrence-btn" id="viewCalendarBtn" type="button" style="margin:0; flex:1; background:rgba(24,74,60,0.08); border-color:var(--primary); color:var(--primary); display:flex; align-items:center; justify-content:center; gap:6px;">
-        <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        Ver Calendário de Contas
       </button>
     </div>
     <button class="import-trigger" id="importBtn">
@@ -2854,56 +2833,6 @@
     <h2>Tendência de 6 meses</h2>
     <div class="trend-chart" id="trendChart"></div>
   </section>
-
-  <section class="card reveal" style="animation-delay:.148s">
-    <h2>Análise de Hábitos: Gasto por Dia da Semana</h2>
-    <div class="trend-chart" id="weekdayChart"></div>
-  </section>
-
-  <section class="card reveal" style="animation-delay:.15s">
-    <h2>Previsão de Fluxo de Caixa</h2>
-    <div id="forecastBox"></div>
-  </section>
-
-  <!-- ===================== WIDGET SIMULADOR "E SE?" ===================== -->
-  <section class="card simulator-card reveal" style="animation-delay:.152s;">
-    <h2 style="display:flex; align-items:center; gap:8px">
-      <span style="display:flex; align-items:center; gap:8px">
-        <span style="font-size:20px">💡</span>
-        Simulador Financeiro "E Se?"
-      </span>
-    </h2>
-    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:16px; margin-top:-6px;">Simule o impacto de um gasto planejado adicional no orçamento e projeções deste mês.</p>
-    
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
-      <div>
-        <label style="font-size:12px; font-weight:600; color:var(--ink); display:block; margin-bottom:6px;">Valor a simular (R$)</label>
-        <input type="number" id="simAmount" placeholder="Ex: 500" class="sim-input" min="0">
-      </div>
-      <div>
-        <label style="font-size:12px; font-weight:600; color:var(--ink); display:block; margin-bottom:6px;">Categoria do Gasto</label>
-        <select id="simCategory" class="sim-select"></select>
-      </div>
-    </div>
-
-    <div id="simResults" class="sim-results">
-      <div style="text-align:center; color:var(--ink-soft); font-size:12px;">Digite um valor acima para iniciar a simulação em tempo real.</div>
-    </div>
-  </section>
-
-  <section class="card reveal" style="animation-delay:.155s">
-    <h2>Alertas Inteligentes</h2>
-    <div class="smart-alerts" id="alertsBox"></div>
-  </section>
-
-  <section class="card reveal" style="animation-delay:.158s">
-    <h2>Metas de Economia <span class="hint" id="goalCount"></span></h2>
-    <div class="goals-section" id="goalsBox"></div>
-    <button class="add-goal-btn" id="addGoalBtn" type="button">+ Nova meta de economia</button>
-  </section>
-
-  
-
   <p class="foot">CasaCa$h &middot; Seus dados ficam no seu Supabase.</p>
 </div>
 
@@ -2921,103 +2850,6 @@
     </h2>
     <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">Itens excluídos nos últimos 30 dias. Depois disso, são apagados definitivamente.</p>
     <div id="trashList"></div>
-  </div>
-</div>
-
-<!-- ===================== MODAL: REVISAR PENDÊNCIAS ===================== -->
-<div id="pendingModal" class="modal-overlay hidden">
-  <div class="modal">
-    <h2>
-      <span style="display:flex;align-items:center;gap:8px">
-        <svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></svg>
-        Classificar Novos Gastos
-      </span>
-      <button class="close" id="pendingClose">
-        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </h2>
-    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px">Estes gastos foram importados do seu Nubank / Apple Pay. Selecione onde registrá-los:</p>
-    <div id="pendingList"></div>
-  </div>
-</div>
-
-<!-- ===================== MODAL: ASSISTENTE IA ===================== -->
-<div id="aiModal" class="modal-overlay hidden">
-  <div class="modal ai-modal">
-    <h2 style="margin-bottom: 16px;">
-      <span style="display:flex;align-items:center;gap:8px">
-        <svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary)"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-        Assistente Financeiro IA
-      </span>
-      <button class="close" id="aiClose">
-        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </h2>
-    
-    <div class="ai-container">
-      <div class="ai-gen-row">
-        <button class="import-go" id="aiGenerate">
-          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-          Gerar Relatório Completo do Mês
-        </button>
-      </div>
-
-      <div class="ai-response-scroll" id="aiResponse">
-        <div style="text-align:center; color:var(--ink-soft); padding:50px 10px;">
-          <span style="font-size:32px; opacity:0.35; display:block; margin-bottom:12px;">💡</span>
-          Como posso te ajudar hoje?<br><span style="font-size:12px; opacity:0.7">Gere o relatório mensal ou envie uma pergunta customizada abaixo.</span>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-title" style="margin-top:0; margin-bottom:8px; font-size:11px;">Perguntas Rápidas</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
-          <button class="ai-suggest-btn" data-q="Onde gastamos mais este mês?">Onde gastamos mais?</button>
-          <button class="ai-suggest-btn" data-q="Dicas de economia personalizadas para as nossas despesas.">Dicas de economia</button>
-        </div>
-        
-        <div class="ai-chat-row">
-          <input type="text" id="aiInput" placeholder="Pergunte sobre seus gastos (ex: 'Quanto gastamos com posto?')...">
-          <button class="import-go" id="aiSendBtn">
-            <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            Enviar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== MODAL: CALENDÁRIO DE CONTAS ===================== -->
-<div id="calendarModal" class="modal-overlay hidden">
-  <div class="modal calendar-modal">
-    <h2>
-      <span style="display:flex;align-items:center;gap:8px">
-        <svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        Vencimentos do Mês
-      </span>
-      <button class="close" id="calendarClose">
-        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </h2>
-    
-    <div id="calendarMonthTitle" style="text-align:center; font-weight:700; font-size:16px; text-transform:capitalize; margin-bottom:14px; color:var(--primary);">Junho 2026</div>
-    
-    <!-- Calendar Grid Header -->
-    <div style="display:grid; grid-template-columns: repeat(7, 1fr); text-align:center; font-weight:600; font-size:11px; color:var(--ink-soft); margin-bottom:8px; opacity:0.8;">
-      <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-    </div>
-    
-    <!-- Calendar Grid Days -->
-    <div id="calendarGrid"></div>
-    
-    <!-- Area de Detalhes do Dia Selecionado -->
-    <div id="calendarDetails" style="margin-top: 12px; margin-bottom: 12px; padding: 14px 16px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13.5px; display: none;"></div>
-    
-    <div class="calendar-legend" style="display:flex; justify-content:center; gap:16px; font-size:11px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:12px;">
-      <div style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--in);"></span> Paga / Lançada</div>
-      <div style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--line);"></span> Pendente</div>
-    </div>
   </div>
 </div>
 
@@ -3290,9 +3122,6 @@ function loadBudgets(){try{const s=localStorage.getItem('budgets_'+(state.me.hou
 function saveBudgets(){localStorage.setItem('budgets_'+(state.me.household||'d'),JSON.stringify(state.budgets));}
 function loadRecurrences(){try{const s=localStorage.getItem('recurrences_'+(state.me.household||'d'));state.recurrences=s?JSON.parse(s):[];}catch(e){state.recurrences=[];}}
 function saveRecurrences(){localStorage.setItem('recurrences_'+(state.me.household||'d'),JSON.stringify(state.recurrences));}
-function loadGoals(){try{const s=localStorage.getItem('goals_'+(state.me.household||'d'));state.goals=s?JSON.parse(s):[];}catch(e){state.goals=[];}}
-function saveGoals(){localStorage.setItem('goals_'+(state.me.household||'d'),JSON.stringify(state.goals));}
-
 /* ----- GRÁFICO DE TENDÊNCIA 6 MESES ----- */
 function renderTrendChart(){
   const box=$('trendChart');if(!box)return;
@@ -3332,126 +3161,6 @@ function renderRecurrences(){
   box.querySelectorAll('.r-del').forEach(btn=>{btn.onclick=()=>{const r=pending[+btn.dataset.rd];const idx=state.recurrences.indexOf(r);if(idx!==-1){state.recurrences.splice(idx,1);saveRecurrences();renderRecurrences();showToast('Removida.','success');}};});
 }
 /* ----- COLAR NOTIFICAÇÃO DO NUBANK ----- */
-async function pasteNubankNotification() {
-  let text = '';
-  
-  // Tenta ler do clipboard primeiro
-  try {
-    if (navigator.clipboard && navigator.clipboard.readText) {
-      text = await navigator.clipboard.readText();
-    }
-  } catch(e) {}
-  
-  // Se não conseguiu, pede pra digitar/colar manualmente
-  if (!text) {
-    text = prompt('Cole o texto da notificação do banco aqui (Nubank, BB, Itaú, etc.):\n\nExemplo: "BB: Compra de R$ 50,00 aprovada em Supermercado Extra."');
-  }
-  
-  if (!text || !text.trim()) return;
-  
-  let amount = 0;
-  let merchant = '';
-  
-  // 1. Extrair valor (padrão em qualquer banco brasileiro)
-  const amtMatch = text.match(/R\$\s*([\d.,]+)/i);
-  if (amtMatch) {
-    let amtStr = amtMatch[1].trim();
-    // Limpar e formatar o valor
-    amtStr = amtStr.replace(/[^\d.,-]/g, '');
-    const hasComma = amtStr.includes(',');
-    const hasPeriod = amtStr.includes('.');
-    if (hasComma && hasPeriod) {
-      if (amtStr.indexOf(',') > amtStr.indexOf('.')) {
-        amtStr = amtStr.replace(/\./g, '').replace(',', '.');
-      } else {
-        amtStr = amtStr.replace(/,/g, '');
-      }
-    } else if (hasComma) {
-      amtStr = amtStr.replace(/,/g, '.');
-    }
-    amount = parseFloat(amtStr);
-  }
-  
-  // 2. Extrair comerciante
-  const regex = /\b(?:em|no\(a\)|no\s+a|no|na|estabelecimento)\s+([^.,:\-\r\n]{2,50})/gi;
-  let match;
-  const candidates = [];
-
-  while ((match = regex.exec(text)) !== null) {
-    let candidate = match[1].trim();
-    
-    // Limpar prefixos capturados
-    candidate = candidate.replace(/^(?:estabelecimento|no\(a\)|no|na|em)\s+/gi, '').trim();
-
-    // Limpar termos de parada comuns no fim do nome
-    candidate = candidate.replace(/\s+(?:para|no|com|na|em|final|dia|de|valor|limite|disponivel|às|as)\b.*/i, '');
-    candidate = candidate.trim();
-
-    // Filtros
-    const isDate = /\d{2}\/\d{2}/.test(candidate) || /^\d+$/.test(candidate);
-    const isCard = /\b(?:cartao|cartão|ourocard|itaucard|credito|debito|seu|sua|conta)\b/i.test(candidate);
-    
-    if (candidate.length >= 2 && !isDate && !isCard) {
-      candidates.push(candidate);
-    }
-  }
-
-  if (candidates.length > 0) {
-    merchant = candidates[candidates.length - 1];
-  }
-
-  if (!merchant) {
-    let cleanText = text.replace(/^(BB:|Itaucard:|Inter:|C6 Bank:|Bradesco Cartoes:)\s*/gi, '');
-    cleanText = cleanText.replace(/R\$\s*[\d.,]+/gi, '');
-    const fallbackMatch = cleanText.match(/([^.,:\-\s][^.,:\-\r\n]{2,20})/);
-    merchant = fallbackMatch ? fallbackMatch[1].trim() : 'Compra Cartão';
-  }
-
-  merchant = merchant.replace(/\s+/g, ' ').trim();
-  merchant = merchant.replace(/[.,\-\s]+$/g, '');
-  
-  if (!amount || amount <= 0) {
-    showToast('Não encontrei o valor na notificação. Verifique o texto colado.', 'error');
-    return;
-  }
-  
-  // Sugerir categoria pela IA
-  const sugCat = autoCategorize(merchant);
-  
-  // Confirmar com o usuário
-  const ok = confirm(
-    `📋 Notificação parseada!\n\n` +
-    `💰 Valor: R$ ${amount.toFixed(2).replace('.', ',')}\n` +
-    `🏪 Local: ${merchant}\n` +
-    `📂 Categoria: ${catById(sugCat).label}\n\n` +
-    `Confirma lançamento?`
-  );
-  
-  if (!ok) return;
-  
-  // Inserir no banco
-  const {error} = await sb.from('transactions').insert({
-    household_id: state.me.household,
-    user_id: state.me.id,
-    space: state.view === 'casa' ? 'casa' : 'pessoal',
-    type: 'out',
-    amount,
-    category: sugCat,
-    description: merchant,
-    occurred_on: new Date().toISOString().slice(0, 10),
-    pending: false
-  });
-  
-  if (error) {
-    showToast('Erro: ' + error.message, 'error');
-    return;
-  }
-  
-  showToast(`✅ ${merchant} — R$ ${amount.toFixed(2).replace('.', ',')} lançado!`, 'success');
-  await loadTx();
-  renderAll();
-}
-
 function addRecurrence(){
   const desc=prompt('Nome da conta fixa (ex: Netflix, Aluguel):');if(!desc)return;
   const amtStr=prompt('Valor mensal (R$):');if(!amtStr)return;
@@ -3461,90 +3170,8 @@ function addRecurrence(){
 }
 
 /* ----- METAS DE ECONOMIA ----- */
-function renderGoals(){
-  const box=$('goalsBox');if(!box)return;
-  if(!state.goals.length){box.innerHTML='<div style="text-align:center;color:var(--ink-soft);padding:16px;font-size:13px">Nenhuma meta criada ainda. Crie uma meta para acompanhar sua economia!</div>';$('goalCount').textContent='';return;}
-  $('goalCount').textContent=state.goals.length+' meta'+(state.goals.length>1?'s':'');
-  box.innerHTML='';
-  state.goals.forEach((g,i)=>{
-    const pct=g.target>0?Math.min((g.saved/g.target)*100,100):0;
-    const remaining=Math.max(g.target-g.saved,0);
-    const card=document.createElement('div');card.className='goal-card';
-    card.innerHTML=`<div class="goal-header"><span class="goal-name">${g.emoji||'🎯'} ${esc(g.name)}</span><span class="goal-target">R$ ${fmt(g.saved)} / R$ ${fmt(g.target)}</span></div><div class="goal-bar"><i style="width:${pct}%"></i></div><div class="goal-footer"><span>${pct.toFixed(0)}% concluído</span><span>Faltam R$ ${fmt(remaining)}</span><div class="goal-actions"><button data-ga="${i}" title="Depositar">+ Depositar</button><button data-gd="${i}" title="Excluir">✕</button></div></div>`;
-    box.appendChild(card);
-  });
-  box.querySelectorAll('[data-ga]').forEach(btn=>{btn.onclick=()=>{const i=+btn.dataset.ga;const v=prompt('Quanto depositar na meta "'+state.goals[i].name+'"? (R$):');if(!v)return;const a=parseFloat(v.replace(',','.'));if(!a||a<=0)return;state.goals[i].saved+=a;saveGoals();renderGoals();showToast('R$ '+fmt(a)+' depositado!','success');};});
-  box.querySelectorAll('[data-gd]').forEach(btn=>{btn.onclick=()=>{const i=+btn.dataset.gd;if(!confirm('Excluir meta "'+state.goals[i].name+'"?'))return;state.goals.splice(i,1);saveGoals();renderGoals();showToast('Meta removida.','success');};});
-}
-function addGoal(){
-  const name=prompt('Nome da meta (ex: Viagem Disney):');if(!name)return;
-  const targetStr=prompt('Valor total da meta (R$):');if(!targetStr)return;
-  const target=parseFloat(targetStr.replace(',','.'));if(!target||target<=0){showToast('Valor inválido.','error');return;}
-  const emojis=['🎯','✈️','🏠','🚗','📱','💍','🎓','🏖️','💻','🎁'];
-  const emoji=emojis[state.goals.length%emojis.length];
-  state.goals.push({name:name.trim(),target,saved:0,emoji,createdAt:new Date().toISOString()});
-  saveGoals();renderGoals();showToast('Meta "'+name+'" criada!','success');
-}
-
 /* ----- ALERTAS INTELIGENTES ----- */
-function renderAlerts(){
-  const box=$('alertsBox');if(!box)return;
-  const alerts=[];
-  const rows=expenseRows();const total=sumv(rows);
-  const y=state.cursor.getFullYear(),m=state.cursor.getMonth();
-  const prevD=new Date(y,m-1,1);const prevRows=expenseRows(prevD);const prevTotal=sumv(prevRows);
-  // Alert: spending increase by category
-  const byCat={};rows.forEach(t=>byCat[t.category]=(byCat[t.category]||0)+t.amount);
-  const prevByCat={};prevRows.forEach(t=>prevByCat[t.category]=(prevByCat[t.category]||0)+t.amount);
-  Object.entries(byCat).forEach(([cid,val])=>{
-    const prev=prevByCat[cid]||0;
-    if(prev>0&&val>prev*1.3){const pct=((val-prev)/prev*100).toFixed(0);const c=catById(cid);alerts.push({icon:'📈',bg:'rgba(176,71,63,.1)',text:`<strong>${esc(c.label)}</strong> subiu <strong>${pct}%</strong> vs. mês passado (R$ ${fmt(prev)} → R$ ${fmt(val)})`});}
-  });
-  // Alert: budget exceeded
-  Object.entries(state.budgets).forEach(([cid,limit])=>{
-    const spent=byCat[cid]||0;
-    if(spent>=limit){const c=catById(cid);alerts.push({icon:'🚨',bg:'rgba(199,91,62,.1)',text:`<strong>${esc(c.label)}</strong> estourou o orçamento! R$ ${fmt(spent)} de R$ ${fmt(limit)}`});}
-    else if(spent>=limit*0.8){const c=catById(cid);alerts.push({icon:'⚠️',bg:'rgba(176,125,43,.1)',text:`<strong>${esc(c.label)}</strong> está em <strong>${(spent/limit*100).toFixed(0)}%</strong> do orçamento (R$ ${fmt(spent)} de R$ ${fmt(limit)})`});}
-  });
-  // Alert: total spending vs previous month
-  if(prevTotal>0&&total>prevTotal*1.2){const pct=((total-prevTotal)/prevTotal*100).toFixed(0);alerts.push({icon:'💸',bg:'rgba(176,71,63,.1)',text:`Gasto total <strong>${pct}% maior</strong> que o mês passado`});}
-  if(prevTotal>0&&total<prevTotal*0.8){const pct=((prevTotal-total)/prevTotal*100).toFixed(0);alerts.push({icon:'🎉',bg:'rgba(44,106,87,.1)',text:`Parabéns! Gasto total <strong>${pct}% menor</strong> que o mês passado`});}
-  if(!alerts.length){alerts.push({icon:'✅',bg:'rgba(44,106,87,.1)',text:'Tudo certo! Nenhum alerta para este mês.'});}
-  box.innerHTML=alerts.map(a=>`<div class="alert-card"><div class="alert-icon" style="background:${a.bg}">${a.icon}</div><div class="alert-text">${a.text}</div></div>`).join('');
-}
-
 /* ----- PREVISÃO DE FLUXO DE CAIXA ----- */
-function renderForecast(){
-  const box=$('forecastBox');if(!box)return;
-  const y=state.cursor.getFullYear(),m=state.cursor.getMonth();
-  const now=new Date();const isCurr=y===now.getFullYear()&&m===now.getMonth();
-  if(!isCurr){box.innerHTML='<div style="text-align:center;color:var(--ink-soft);padding:16px;font-size:13px">A previsão está disponível apenas para o mês atual.</div>';return;}
-  // Average of last 3 months expenses
-  let avgExp=0;
-  for(let i=1;i<=3;i++){const d=new Date(y,m-i,1);avgExp+=sumv(expenseRows(d));}
-  avgExp/=3;
-  // Current month income
-  const income=sumv(bolsoIn());
-  const spent=sumv(expenseRows());
-  const daysInMonth=new Date(y,m+1,0).getDate();
-  const daysElapsed=now.getDate();
-  const projection=daysElapsed>0?(spent/daysElapsed)*daysInMonth:0;
-  const forecast=income-projection;
-  // Recurring costs
-  const recurringTotal=state.recurrences.reduce((s,r)=>s+r.amount,0);
-  box.innerHTML=`
-    <div class="forecast-box">
-      <div class="fc-label">Previsão para fim do mês</div>
-      <div class="fc-value num" style="color:${forecast>=0?'#A8F0D4':'#FFC9B8'}">${forecast<0?'-':''}R$ ${fmt(Math.abs(forecast))}</div>
-      <div class="fc-sub">${forecast>=0?'Sobra prevista baseada no ritmo atual':'Déficit previsto — considere reduzir gastos'}</div>
-      <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;opacity:.8">
-        <span>📊 Projeção: R$ ${fmt(projection)}</span>
-        <span>📈 Média 3 meses: R$ ${fmt(avgExp)}</span>
-        ${recurringTotal>0?'<span>🔄 Fixos: R$ '+fmt(recurringTotal)+'</span>':''}
-      </div>
-    </div>`;
-}
-
 /* =========================================================
    3) AUTENTICAÇÃO
 ========================================================= */
@@ -3741,9 +3368,8 @@ function renderForm(){
   }
   const payerRow=$('payerRow');
   if(payerRow){
-    const isJean = (state.me.name || '').toLowerCase().includes('jean');
-    payerRow.style.display = (isCasa && isJean) ? 'block' : 'none';
-    if(isCasa && isJean) renderPayerChips();
+    payerRow.style.display = isCasa ? 'block' : 'none';
+    if(isCasa) renderPayerChips();
   }
 }
 
@@ -3941,87 +3567,6 @@ function renderList(){
 }
 
 /* ----- FILA DE PENDENTES (Render & Lógica) ----- */
-function updatePendingBanner(){
-  const pendings = state.tx.filter(t => t.pending === true && t.user_id === mineId());
-  const banner = $('pendingBanner');
-  if (pendings.length > 0) {
-    $('pendingCount').textContent = pendings.length;
-    banner.classList.remove('hidden');
-  } else {
-    banner.classList.add('hidden');
-  }
-}
-
-function openPendingReview() {
-  const pendings = state.tx.filter(t => t.pending === true && t.user_id === mineId());
-  renderPendingList(pendings);
-  $('pendingModal').classList.remove('hidden');
-}
-
-function closePendingReview() {
-  $('pendingModal').classList.add('hidden');
-}
-
-function renderPendingList(items) {
-  const box = $('pendingList');
-  if (items.length === 0) {
-    box.innerHTML = '<div style="text-align:center; padding:30px; color:var(--ink-soft);">Nenhum gasto pendente. Bom trabalho!</div>';
-    setTimeout(closePendingReview, 800);
-    return;
-  }
-  box.innerHTML = '';
-  items.forEach(t => {
-    const card = document.createElement('div');
-    card.className = 'pending-card';
-    card.id = `pending-card-${t.id}`;
-    
-    const d = new Date(t.date+'T12:00:00');
-    const dstr = d.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
-    
-    const isIncome = t.type === 'in';
-    const cats = isIncome ? INCOME_CATS : debitCats();
-    
-    // IA: sugerir categoria com base na descrição
-    const suggestedCat = autoCategorize(t.description || '');
-    
-    let catOpts = '';
-    cats.forEach(c => {
-      catOpts += `<option value="${c.id}"${c.id === suggestedCat ? ' selected' : ''}>${esc(c.label)}</option>`;
-    });
-    
-    card.innerHTML = `
-      <div class="card-row-top">
-        <div class="title">${esc(t.description || (isIncome ? 'Receita importada' : 'Gasto importado'))}</div>
-        <div class="val num" style="color: ${isIncome ? 'var(--in)' : 'var(--ink)'}">
-          ${isIncome ? '+ ' : ''}R$ ${fmt(t.amount)}
-        </div>
-      </div>
-      <div class="card-row-bottom">
-        <div class="meta-info">
-          <span class="sub">${isIncome ? 'Recebimento' : 'Importado'} em ${dstr}</span>
-        </div>
-        <div class="controls">
-          <select class="cat-select" data-tid="${t.id}">${catOpts}</select>
-          <div class="actions">
-            ${isIncome ? '' : '<button class="btn-casa">Casa</button>'}
-            <button class="btn-pess">${isIncome ? 'Receber no Bolso' : 'Pessoal'}</button>
-            <button class="btn-discard" title="Descartar">✕</button>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    const getCat = () => card.querySelector('.cat-select').value;
-    if (!isIncome) {
-      card.querySelector('.btn-casa').onclick = () => classifyTx(t.id, 'casa', getCat());
-    }
-    card.querySelector('.btn-pess').onclick = () => classifyTx(t.id, 'pessoal', getCat());
-    card.querySelector('.btn-discard').onclick = () => discardPendingTx(t.id);
-    
-    box.appendChild(card);
-  });
-}
-
 async function classifyTx(id, space, category) {
   // Efeito visual sênior: remove o item suavemente antes de atualizar
   const card = $(`pending-card-${id}`);
@@ -4042,8 +3587,7 @@ async function classifyTx(id, space, category) {
   setTimeout(async () => {
     await loadTx();
     renderAll();
-    updatePendingBanner();
-    const pendings = state.tx.filter(t => t.pending === true);
+      const pendings = state.tx.filter(t => t.pending === true);
     renderPendingList(pendings);
   }, 250);
 }
@@ -4065,403 +3609,9 @@ async function discardPendingTx(id) {
   setTimeout(async () => {
     await loadTx();
     renderAll();
-    updatePendingBanner();
-    const pendings = state.tx.filter(t => t.pending === true);
+      const pendings = state.tx.filter(t => t.pending === true);
     renderPendingList(pendings);
   }, 250);
-}
-
-/* ----- ASSISTENTE FINANCEIRO IA (Gemini) ----- */
-function openAI() {
-  $('aiModal').classList.remove('hidden');
-}
-function closeAI() {
-  $('aiModal').classList.add('hidden');
-}
-
-function parseMarkdown(text) {
-  if (!text) return '';
-  const lines = text.split('\n');
-  let html = '';
-  let inList = false;
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) {
-      if (inList) { html += '</ul>'; inList = false; }
-      continue;
-    }
-    
-    if (line.startsWith('### ')) {
-      if (inList) { html += '</ul>'; inList = false; }
-      html += `<h3 style="font-family:'Fraunces',serif; font-size:16px; margin: 18px 0 8px; color:var(--primary);">${line.slice(4)}</h3>`;
-    } else if (line.startsWith('## ')) {
-      if (inList) { html += '</ul>'; inList = false; }
-      html += `<h2 style="font-family:'Fraunces',serif; font-size:18px; margin: 22px 0 10px; color:var(--primary); border-bottom: 1px solid var(--line); padding-bottom:4px;">${line.slice(3)}</h2>`;
-    } else if (line.startsWith('* ') || line.startsWith('- ')) {
-      if (!inList) { html += '<ul style="margin: 8px 0 12px 18px; line-height:1.6;">'; inList = true; }
-      html += `<li style="margin-bottom:6px;">${line.slice(2)}</li>`;
-    } else {
-      if (inList) { html += '</ul>'; inList = false; }
-      html += `<p style="margin-bottom:12px; line-height:1.5; text-align:justify;">${line}</p>`;
-    }
-  }
-  if (inList) html += '</ul>';
-  
-  // Substituir negrito
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--primary); font-weight:700;">$1</strong>');
-  return html;
-}
-
-async function askAI(promptText = '') {
-  const btn = $('aiGenerate');
-  const responseBox = $('aiResponse');
-  
-  btn.disabled = true;
-  btn.textContent = 'Aguardando Inteligência Artificial...';
-  
-  // Skeleton loader sênior
-  responseBox.innerHTML = `
-    <div style="display:flex; flex-direction:column; gap:12px; padding:10px 0;">
-      <div style="height:18px; background:var(--line); border-radius:4px; animation: pulse 1.5s infinite"></div>
-      <div style="height:18px; background:var(--line); border-radius:4px; animation: pulse 1.5s infinite; width:85%"></div>
-      <div style="height:18px; background:var(--line); border-radius:4px; animation: pulse 1.5s infinite; width:92%"></div>
-      <div style="height:18px; background:var(--line); border-radius:4px; animation: pulse 1.5s infinite; width:65%"></div>
-    </div>
-  `;
-  
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    const token = session?.access_token;
-    
-    // Mês selecionado no calendário do aplicativo
-    const targetMonth = ym(state.cursor);
-    
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/analyze-expenses`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        month: targetMonth,
-        prompt: promptText
-      })
-    });
-    
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error || 'Erro na comunicação com o servidor de IA.');
-    }
-    
-    const data = await response.json();
-    responseBox.innerHTML = parseMarkdown(data.analysis);
-  } catch (err) {
-    responseBox.innerHTML = `<div style="color:var(--cat-saude); font-weight:600; padding:10px; border:1px dashed var(--cat-saude); border-radius:12px;">Erro ao gerar relatório: ${err.message}</div>`;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24" style="margin-right:6px"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> Analisar Gastos do Mês Selecionado`;
-  }
-}
-
-function renderWeekdayChart() {
-  const box = $('weekdayChart');
-  if (!box) return;
-  
-  const rows = expenseRows();
-  if (rows.length === 0) {
-    box.innerHTML = '<div style="text-align:center; color:var(--ink-soft); font-size:12px; padding:30px;">Sem transações para analisar este mês.</div>';
-    return;
-  }
-  
-  const totals = [0, 0, 0, 0, 0, 0, 0];
-  const counts = [0, 0, 0, 0, 0, 0, 0];
-  
-  rows.forEach(t => {
-    const d = new Date(t.date + 'T12:00:00');
-    const w = d.getDay();
-    totals[w] += t.amount;
-    counts[w] += 1;
-  });
-  
-  const daysLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  const maxVal = Math.max(...totals, 1);
-  
-  const W = 600, H = 160, pL = 55, pR = 15, pT = 15, pB = 30;
-  const cW = W - pL - pR, cH = H - pT - pB;
-  
-  let barsHtml = '';
-  let labelsHtml = '';
-  let gridHtml = '';
-  
-  for (let i = 0; i <= 3; i++) {
-    const y = pT + (i / 3) * cH;
-    const v = maxVal - (i / 3) * maxVal;
-    gridHtml += `<line x1="${pL}" y1="${y}" x2="${W - pR}" y2="${y}" class="grid-line" style="stroke:var(--line); stroke-width:1; stroke-dasharray: 2 2;" />`;
-    gridHtml += `<text x="${pL - 8}" y="${y + 4}" class="chart-value" style="font-size:10px; fill:var(--ink-soft); text-anchor:end;">${v >= 1000 ? (v / 1000).toFixed(1) + 'k' : Math.round(v)}</text>`;
-  }
-  
-  const barWidth = (cW / 7) * 0.6;
-  const gap = (cW / 7) * 0.4;
-  
-  totals.forEach((val, i) => {
-    const barHeight = (val / maxVal) * cH;
-    const x = pL + i * (barWidth + gap) + gap / 2;
-    const y = pT + cH - barHeight;
-    
-    barsHtml += `
-      <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="4" ry="4" fill="var(--primary)" opacity="0.85" style="transition: all 0.2s ease; cursor: pointer;" class="weekday-bar" data-i="${i}" />
-    `;
-    
-    labelsHtml += `
-      <text x="${x + barWidth / 2}" y="${H - 8}" class="chart-label" style="font-size:11px; fill:var(--ink-soft); text-anchor:middle; font-weight:600;">${daysLabel[i]}</text>
-    `;
-  });
-  
-  box.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%;">
-      ${gridHtml}
-      ${barsHtml}
-      ${labelsHtml}
-    </svg>
-    <div class="trend-tooltip" id="weekdayTooltip" style="position:absolute; background:var(--ink); color:var(--surface); padding:6px 10px; border-radius:8px; font-size:11px; pointer-events:none; opacity:0; transition:opacity .15s ease; z-index:10; white-space:nowrap; box-shadow:var(--shadow-lg);"></div>
-  `;
-  
-  box.querySelectorAll('.weekday-bar').forEach(bar => {
-    bar.addEventListener('mouseenter', (ev) => {
-      const i = +bar.dataset.i;
-      const val = totals[i];
-      const count = counts[i];
-      const tip = $('weekdayTooltip');
-      tip.innerHTML = `<strong>${daysLabel[i]}</strong>: R$ ${fmt(val)} (${count} compra${count > 1 ? 's' : ''})`;
-      tip.style.opacity = '1';
-      
-      const svgR = box.querySelector('svg').getBoundingClientRect();
-      const sX = svgR.width / W, sY = svgR.height / H;
-      const xAttr = +bar.getAttribute('x');
-      const yAttr = +bar.getAttribute('y');
-      const wAttr = +bar.getAttribute('width');
-      
-      tip.style.left = ( (xAttr + wAttr/2) * sX - 40 ) + 'px';
-      tip.style.top = ( yAttr * sY - 35 ) + 'px';
-      bar.style.opacity = '1';
-      bar.style.fill = 'var(--accent)';
-    });
-    
-    bar.addEventListener('mouseleave', () => {
-      const tip = $('weekdayTooltip');
-      tip.style.opacity = '0';
-      bar.style.opacity = '0.85';
-      bar.style.fill = 'var(--primary)';
-    });
-  });
-}
-
-function initSimulator() {
-  const simAmtInput = $('simAmount');
-  const simCatSelect = $('simCategory');
-  if (!simAmtInput || !simCatSelect) return;
-  
-  const currentSelectedVal = simCatSelect.value;
-  simCatSelect.innerHTML = '';
-  currentCats().forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = c.label;
-    if (c.id === currentSelectedVal) opt.selected = true;
-    simCatSelect.appendChild(opt);
-  });
-  
-  if (!simAmtInput.dataset.listenerSet) {
-    simAmtInput.addEventListener('input', runSimulation);
-    simCatSelect.addEventListener('change', runSimulation);
-    simAmtInput.dataset.listenerSet = "true";
-  }
-}
-
-function runSimulation() {
-  const amt = parseFloat($('simAmount').value);
-  const cat = $('simCategory').value;
-  const resBox = $('simResults');
-  
-  if (isNaN(amt) || amt <= 0) {
-    resBox.innerHTML = '<div style="text-align:center; color:var(--ink-soft); font-size:12px;">Digite um valor acima para iniciar a simulação em tempo real.</div>';
-    return;
-  }
-  
-  const isBolso = state.view === 'bolso';
-  const rows = expenseRows();
-  const currentOut = sumv(rows);
-  
-  const y = state.cursor.getFullYear(), m = state.cursor.getMonth();
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const now = new Date();
-  const isCurrent = (y === now.getFullYear() && m === now.getMonth());
-  const daysElapsed = isCurrent ? now.getDate() : daysInMonth;
-  
-  const simOut = currentOut + amt;
-  const simAvgDay = daysElapsed ? simOut / daysElapsed : 0;
-  const simProjection = isCurrent ? simAvgDay * daysInMonth : simOut;
-  
-  const budgetLimit = state.budgets[cat] || 0;
-  const catTotal = sumv(rows.filter(t => t.category === cat));
-  const simCatTotal = catTotal + amt;
-  const catObj = catById(cat);
-  
-  let advice = '';
-  let adviceColor = 'var(--good)';
-  
-  if (isBolso) {
-    const inc = sumv(bolsoIn());
-    const currentSaved = inc - currentOut;
-    const simSaved = inc - simOut;
-    const simRate = inc > 0 ? (simSaved / inc) * 100 : 0;
-    
-    advice = `<strong>Impacto:</strong> O saldo do seu bolso cairia de R$ ${fmt(currentSaved)} para <strong>R$ ${fmt(simSaved)}</strong> (taxa de poupança: ${simRate.toFixed(0)}%).`;
-    if (simSaved < 0) {
-      advice += `<br><span style="color:var(--accent); font-weight:700;">⚠️ Alerta: Esse gasto deixa seu saldo negativo no mês!</span>`;
-      adviceColor = 'var(--accent)';
-    } else {
-      advice += `<br>🎉 Sobra positiva. Compra viável dentro das receitas.`;
-    }
-  } else {
-    advice = `<strong>Projeção:</strong> O gasto total do mês subiria para <strong>R$ ${fmt(simProjection)}</strong>.`;
-    
-    if (budgetLimit > 0) {
-      const pct = (simCatTotal / budgetLimit) * 100;
-      advice += `<br><strong>Orçamento de ${catObj.label}:</strong> subirá para ${pct.toFixed(0)}% do limite (R$ ${fmt(simCatTotal)} de R$ ${fmt(budgetLimit)}).`;
-      
-      if (simCatTotal > budgetLimit) {
-        advice += `<br><span style="color:var(--accent); font-weight:700;">🚨 Estouro de Limite: Supera o orçamento da categoria em R$ ${fmt(simCatTotal - budgetLimit)}!</span>`;
-        adviceColor = 'var(--accent)';
-      } else if (pct > 80) {
-        advice += `<br><span style="color:#B07D2B; font-weight:700;">⚠️ Atenção: Categoria entra na zona crítica (>80% do limite).</span>`;
-        adviceColor = '#B07D2B';
-      } else {
-        advice += `<br>🟢 Compra dentro do orçamento planejado da categoria.`;
-      }
-    } else {
-      advice += `<br>💡 Esta categoria não tem limite mensal configurado.`;
-    }
-  }
-  
-  resBox.innerHTML = `
-    <div style="font-size:13px; line-height:1.5; color:var(--ink); border-left:3px solid ${adviceColor}; padding-left:12px;">
-      ${advice}
-    </div>
-  `;
-}
-
-function openCalendar() {
-  renderCalendar();
-  $('calendarModal').classList.remove('hidden');
-}
-
-function closeCalendar() {
-  $('calendarModal').classList.add('hidden');
-}
-
-function renderCalendar() {
-  const now = new Date();
-  const detailsEl = $('calendarDetails');
-  if (detailsEl) {
-    detailsEl.innerHTML = '';
-    detailsEl.style.display = 'none';
-  }
-  const year = state.cursor.getFullYear();
-  const month = state.cursor.getMonth();
-  
-  const monthsNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-  $('calendarMonthTitle').textContent = `${monthsNames[month]} ${year}`;
-  
-  const grid = $('calendarGrid');
-  grid.innerHTML = '';
-  
-  const firstDayIndex = new Date(year, month, 1).getDay();
-  const totalDays = new Date(year, month + 1, 0).getDate();
-  const prevTotalDays = new Date(year, month, 0).getDate();
-  
-  const monthTx = confirmedTxList().filter(t => t.date.slice(0, 7) === ym(state.cursor));
-  
-  const pendingRecurrences = state.recurrences.filter(r => !monthTx.some(t => {
-    const dm = t.description && r.description && t.description.toLowerCase().includes(r.description.toLowerCase());
-    const am = Math.abs(t.amount - r.amount) < 0.01;
-    return dm || am;
-  }));
-  
-  for (let i = firstDayIndex - 1; i >= 0; i--) {
-    const el = document.createElement('div');
-    el.className = 'cal-day other-month';
-    el.textContent = prevTotalDays - i;
-    grid.appendChild(el);
-  }
-  
-  for (let d = 1; d <= totalDays; d++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day';
-    el.textContent = d;
-    
-    if (d === now.getDate() && month === now.getMonth() && year === now.getFullYear()) {
-      el.classList.add('today');
-    }
-    
-    const dayRecs = state.recurrences.filter(r => (r.day || 1) === d);
-    if (dayRecs.length > 0) {
-      el.classList.add('has-bills');
-      
-      const dayPendings = dayRecs.filter(r => pendingRecurrences.includes(r));
-      const isPaid = dayPendings.length === 0;
-      
-      if (isPaid) {
-        el.classList.add('paid');
-      }
-      
-      const names = dayRecs.map(r => `${r.description} (R$ ${fmt(r.amount)})`).join(', ');
-      el.title = `${isPaid ? 'Pago' : 'Pendente'}: ${names}`;
-      
-      const dot = document.createElement('span');
-      dot.className = 'dot-indicator';
-      el.appendChild(dot);
-      
-      el.onclick = () => {
-        const detailsEl = $('calendarDetails');
-        if (!detailsEl) return;
-        let html = `<h4 style="font-weight:700; margin-bottom:10px; color:var(--primary); display:flex; align-items:center; gap:6px; font-family:'Outfit',sans-serif;">
-          <svg class="svg-icon" viewBox="0 0 24 24" style="width:14px;height:14px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Dia ${d} de ${monthsNames[month]}
-        </h4>`;
-        
-        dayRecs.forEach(r => {
-          const recPaid = !pendingRecurrences.includes(r);
-          html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-weight:500; font-size:13px;">
-            <span style="display:flex; align-items:center; gap:6px;">
-              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${recPaid ? 'var(--in)' : 'var(--accent)'};"></span>
-              ${esc(r.description)}
-            </span>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-family:'Outfit',sans-serif; font-weight:700;">R$ ${fmt(r.amount)}</span>
-              <span style="font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:6px; background:${recPaid ? 'rgba(16,185,129,0.12)' : 'rgba(244,63,94,0.12)'}; color:${recPaid ? 'var(--in)' : 'var(--accent)'};">
-                ${recPaid ? 'Pago' : 'Pendente'}
-              </span>
-            </div>
-          </div>`;
-        });
-        detailsEl.innerHTML = html;
-        detailsEl.style.display = 'block';
-      };
-    }
-    
-    grid.appendChild(el);
-  }
-  
-  const totalGridCells = firstDayIndex + totalDays;
-  const remainingCells = (7 - (totalGridCells % 7)) % 7;
-  for (let i = 1; i <= remainingCells; i++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day other-month';
-    el.textContent = i;
-    grid.appendChild(el);
-  }
 }
 
 function renderAll(){
@@ -4470,14 +3620,8 @@ function renderAll(){
   renderStats();
   renderBreakdown();
   renderTrendChart();
-  renderWeekdayChart();
-  initSimulator();
   renderRecurrences();
-  renderForecast();
-  renderAlerts();
-  renderGoals();
   renderList();
-  updatePendingBanner();
 }
 
 /* =========================================================
@@ -4621,7 +3765,7 @@ async function removeTx(id){
   const {error}=await sb.from('transactions').update({deleted_at:new Date().toISOString()}).eq('id',id);
   if(error){showToast('Erro ao excluir', 'error');return;}
   showToast('Enviado para a Lixeira.', 'success');
-  await loadTx();renderAll();updateTrashBadge();updatePendingBanner();
+  await loadTx();renderAll();updateTrashBadge();
 }
 
 function toggleForm(forceOpen = false) {
@@ -5010,22 +4154,6 @@ function parseAmountBR(s){
 }
 
 /* ----- CATEGORIZAÇÃO AUTOMÁTICA ----- */
-function autoCategorize(desc){
-  const d=(desc||'').toLowerCase();
-  const rules=[
-    {k:['mercado','supermercado','atacadão','atacadao','assaí','assai','hortifruti','sacolão','sacolao','carrefour','pão de açúcar','pao de acucar','extra hiper','big bompreço','big bompreco','sam s club','sams club','mercadorama'],c:'mercado'},
-    {k:['restaurante','ifood','burger','pizza','lanche','padaria','café','cafe','mcdonald','subway','sushi','açaí','acai','boteco','bar ','rest ','habibs','bk ','outback','churrascaria'],c:'restaurante'},
-    {k:['uber','99 ','99app','combustível','combustivel','posto','gasolina','estacionamento','pedágio','pedagio','bilhete unico','metro ','onibus','brg*'],c:'transporte'},
-    {k:['aluguel','condomínio','condominio','energia','cemig','copasa','cpfl','enel','água','agua','internet','gás','gas','iptu','luz ','celesc','vivo','claro','tim ','oi ','net '],c:'casa'},
-    {k:['farmácia','farmacia','drogaria','hospital','clínica','clinica','médico','medico','dentista','raia','droga','unimed','amil','hapvida','laboratorio','exame'],c:'saude'},
-    {k:['criança','crianca','escola','brinquedo','fralda','bebê','bebe','infantil','creche','pampers'],c:'criancas'},
-    {k:['cinema','netflix','spotify','disney','hbo','prime video','ingresso','parque','viagem','hotel','game','steam','playstation','xbox','globoplay','teatro'],c:'lazer'},
-    {k:['amazon','mercado livre','shopee','magalu','americanas','aliexpress','shein','magazine','casas bahia','ponto frio','kabum','terabyte','loja','renner','c&a','riachuelo'],c:'compras'},
-  ];
-  for(const r of rules){if(r.k.some(w=>d.includes(w)))return r.c;}
-  return 'outros';
-}
-
 /* ----- DUPLICATAS ----- */
 function markDuplicates(rows){
   // Compara com TODAS as transações — confirmadas E pendentes, casa, pessoal, receita, despesa — TUDO
@@ -5520,8 +4648,6 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('addBtn').onclick=addTx;
   $('cancelEditBtn').onclick=cancelEdit;
   $('addRecurrenceBtn').onclick=addRecurrence;
-  $('pasteNotifBtn').onclick=pasteNubankNotification;
-  $('addGoalBtn').onclick=addGoal;
   $('inAmount').addEventListener('keydown',e=>{if(e.key==='Enter')addTx();});
   $('inDesc').addEventListener('keydown',e=>{if(e.key==='Enter')addTx();});
   
@@ -5541,42 +4667,6 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('trashClose').onclick=closeTrash;
   $('trashModal').onclick=e=>{if(e.target===$('trashModal'))closeTrash();};
   
-  // listeners pendências
-  $('btnReviewPending').onclick=openPendingReview;
-  $('pendingClose').onclick=closePendingReview;
-  $('pendingModal').onclick=e=>{if(e.target===$('pendingModal'))closePendingReview();};
-  
-  // listeners IA
-  $('aiBtn').onclick=openAI;
-  $('aiClose').onclick=closeAI;
-  $('aiModal').onclick=e=>{if(e.target===$('aiModal'))closeAI();};
-  $('aiGenerate').onclick=()=>askAI();
-  $('aiSendBtn').onclick=()=>{
-    const inp = $('aiInput');
-    const q = inp.value.trim();
-    if (!q) return;
-    askAI(q);
-    inp.value = '';
-  };
-  $('aiInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      const q = $('aiInput').value.trim();
-      if (!q) return;
-      askAI(q);
-      $('aiInput').value = '';
-    }
-  });
-  document.querySelectorAll('.ai-suggest-btn').forEach(btn => {
-    btn.onclick = () => {
-      const q = btn.dataset.q;
-      askAI(q);
-    };
-  });
-  
-  // listeners calendário de contas
-  $('viewCalendarBtn').onclick=openCalendar;
-  $('calendarClose').onclick=closeCalendar;
-  $('calendarModal').onclick=e=>{if(e.target===$('calendarModal'))closeCalendar();};
   
   
   // listeners busca e filtro
