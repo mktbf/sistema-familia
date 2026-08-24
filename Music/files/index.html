@@ -3782,7 +3782,7 @@ function groupMerchants(byMerchant) {
         group.amount += byMerchant[keys[j]].amount;
         group.count += byMerchant[keys[j]].count;
         group.keys.push(keys[j]);
-        if (byMerchant[keys[j]].original.length > group.original.length) {
+        if (byMerchant[keys[j]].original.length < group.original.length) {
           group.original = byMerchant[keys[j]].original;
         }
         used.add(keys[j]);
@@ -3798,12 +3798,13 @@ function groupMerchants(byMerchant) {
 let merchantSelectedMonths = new Set();
 // Initialize later during first render
 
-function filterByMerchant(merchantName) {
+window.currentMerchantFilter = null;
+
+function filterByMerchantGroup(keysStr, displayName) {
+  window.currentMerchantFilter = keysStr.split('|');
   const searchInput = $('searchInput');
   if (searchInput) {
-    searchInput.value = merchantName;
-    const event = new Event('input', { bubbles: true });
-    searchInput.dispatchEvent(event);
+    searchInput.value = `[IA] ${displayName}`;
   }
   
   const listCol = $('listCollapsible');
@@ -3812,6 +3813,8 @@ function filterByMerchant(merchantName) {
     const chevron = $('listChevron');
     if(chevron) chevron.style.transform = 'rotate(0deg)';
   }
+  
+  renderAll();
   
   const listSec = $('listSection');
   if (listSec) {
@@ -3940,6 +3943,19 @@ function renderTopMerchants() {
     displayName = displayName.replace(/\s*[-–]\s*Parc\.?\s*\d+\/\d+/gi, '').trim();
     if (!displayName) displayName = catById(data.category).label;
     
+    // IA Title Formatting (Capitalize and map synonyms)
+    let words = displayName.toLowerCase().split(/\s+/);
+    words = words.map(w => {
+        let mapped = SYNONYMS[w] || w;
+        if (mapped.length > 2 || mapped === 'pix') {
+            return mapped.charAt(0).toUpperCase() + mapped.slice(1);
+        }
+        return mapped;
+    });
+    displayName = words.join(' ');
+    displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+
+    
     let badge = '';
     let recurIcon = '';
     
@@ -3955,7 +3971,7 @@ function renderTopMerchants() {
       }
     }
     
-    html += `<div class="merchant-row" style="cursor:pointer;" onclick="filterByMerchant('${esc(displayName).replace(/'/g, "\'")}')">`;
+    html += `<div class="merchant-row" style="cursor:pointer;" onclick="filterByMerchantGroup('${data.keys.join('|')}', '${esc(displayName).replace(/'/g, "\'")}')">`;
     html += '  <div class="merchant-top">';
     html += `    <div class="merchant-name"><span class="merchant-rank">${i + 1}</span>${esc(displayName)}${recurIcon}</div>`;
     html += `    <div class="merchant-amount">R$ ${fmt(data.amount)}</div>`;
