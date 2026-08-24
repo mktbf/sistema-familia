@@ -2652,6 +2652,10 @@
     margin-bottom: 18px;
   }
 
+  /* ----- MERCHANT MONTHS ----- */
+  .merchant-months { display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--line); -ms-overflow-style:none; scrollbar-width:none; }
+  .merchant-months::-webkit-scrollbar { display:none; }
+
   /* ----- COLLAPSIBLE SECTIONS ----- */
   .section-toggle { margin-bottom: 0; }
   .collapsible-body { margin-top: 16px; }
@@ -2875,12 +2879,15 @@
   </section>
 
   <section class="card reveal" style="animation-delay:.08s">
-    <h2 class="section-toggle" data-target="merchantsCollapsible" style="cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
-      <svg class="chevron-icon svg-icon rotated" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(0deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      <span>📊 Onde mais gastou</span>
+    <h2 class="section-toggle" data-target="merchantsCollapsible" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg class="chevron-icon svg-icon rotated" viewBox="0 0 24 24" style="width:18px;height:18px;transition:transform 0.3s;transform:rotate(0deg);flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        📊 Onde mais gastou
+      </div>
       <span class="hint" id="merchantCount"></span>
     </h2>
     <div id="merchantsCollapsible" class="collapsible-body" style="display:block;">
+      <div class="merchant-months" id="merchantMonths"></div>
       <div id="topMerchants"></div>
     </div>
   </section>
@@ -3708,24 +3715,127 @@ function toggleSection(targetId, chevronEl) {
 }
 
 /* ----- TOP MERCHANTS ANALYSIS ----- */
-function normalizeMerchant(desc) {
-  if (!desc) return 'sem descrição';
+const STOP_WORDS = new Set(['de','do','da','dos','das','para','com','por','em','no','na','nos','nas','ao','a','o','e','um','uma','pra','pro']);
+
+function normalizeMerchant(desc, category) {
+  if (!desc || !desc.trim()) {
+    if (category) {
+      const cat = catById(category);
+      return cat ? cat.label.toLowerCase() : 'outros';
+    }
+    return 'outros';
+  }
   let d = desc.trim();
-  // Remove installment suffixes
   d = d.replace(/\s*[-–]\s*Parc\.?\s*\d+\/\d+/gi, '');
   d = d.replace(/\s*[-–]\s*Parcela\s*\d+\/\d+/gi, '');
   d = d.replace(/\s*\(Parc\.?\s*\d+\/\d+\)/gi, '');
-  d = d.trim().toLowerCase();
-  // Collapse multiple spaces
-  d = d.replace(/\s+/g, ' ');
-  return d || 'sem descrição';
+  d = d.trim().toLowerCase().replace(/\s+/g, ' ');
+  return d || 'outros';
+}
+
+function extractKeywords(text) {
+  return text.toLowerCase().replace(/[^a-záàâãéèêíïóôõöúçñ\s]/gi, '').split(/\s+/)
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+}
+
+function similarityScore(a, b) {
+  const kwA = extractKeywords(a);
+  const kwB = extractKeywords(b);
+  if (!kwA.length || !kwB.length) return 0;
+  let matches = 0;
+  kwA.forEach(wa => {
+    if (kwB.some(wb => wa === wb || (wa.length > 3 && wb.length > 3 && (wa.includes(wb) || wb.includes(wa))))) matches++;
+  });
+  return matches / Math.min(kwA.length, kwB.length);
+}
+
+function groupMerchants(byMerchant) {
+  const keys = Object.keys(byMerchant);
+  const merged = {};
+  const used = new Set();
+  
+  for (let i = 0; i < keys.length; i++) {
+    if (used.has(keys[i])) continue;
+    const group = { ...byMerchant[keys[i]], keys: [keys[i]] };
+    
+    for (let j = i + 1; j < keys.length; j++) {
+      if (used.has(keys[j])) continue;
+      if (similarityScore(keys[i], keys[j]) >= 0.5) {
+        group.amount += byMerchant[keys[j]].amount;
+        group.count += byMerchant[keys[j]].count;
+        group.keys.push(keys[j]);
+        if (byMerchant[keys[j]].original.length > group.original.length) {
+          group.original = byMerchant[keys[j]].original;
+        }
+        used.add(keys[j]);
+      }
+    }
+    merged[keys[i]] = group;
+    used.add(keys[i]);
+  }
+  return merged;
+}
+
+let merchantSelectedMonth = null;
+
+function getMonthData(cursor) {
+  const ym = cursor.getFullYear() + '-' + String(cursor.getMonth() + 1).padStart(2, '0');
+  let rows = confirmedTxList().filter(t => t.date.slice(0, 7) === ym && t.type === 'out');
+  if (state.view === 'casa') rows = rows.filter(t => t.space === 'casa');
+  else if (state.view === 'pessoais') rows = rows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
+  else rows = rows.filter(t => t.user_id === state.me.id);
+  return rows;
+}
+
+function filterByMerchant(merchantName) {
+  const searchInput = $('searchInput');
+  if (searchInput) {
+    searchInput.value = merchantName;
+    const event = new Event('input', { bubbles: true });
+    searchInput.dispatchEvent(event);
+  }
+  
+  const listCol = $('listCollapsible');
+  if (listCol && listCol.style.display === 'none') {
+    listCol.style.display = 'block';
+    const chevron = $('listChevron');
+    if(chevron) chevron.style.transform = 'rotate(0deg)';
+  }
+  
+  const listSec = $('listSection');
+  if (listSec) {
+    listSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function renderTopMerchants() {
   const box = $('topMerchants');
   if (!box) return;
   
-  const rows = expenseRows();
+  const monthBox = $('merchantMonths');
+  if (monthBox) {
+    const now = new Date();
+    let chips = '';
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - i, 1);
+      const label = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+      const isSel = (!merchantSelectedMonth && i === 0) || 
+                    (merchantSelectedMonth && merchantSelectedMonth.getMonth() === d.getMonth() && merchantSelectedMonth.getFullYear() === d.getFullYear());
+      chips += `<button class="filter-chip${isSel ? ' active' : ''}" data-mi="${i}" style="text-transform:capitalize;">${label}</button>`;
+    }
+    monthBox.innerHTML = chips;
+    monthBox.querySelectorAll('button').forEach(btn => {
+      btn.onclick = () => {
+        const mi = parseInt(btn.dataset.mi);
+        merchantSelectedMonth = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - mi, 1);
+        renderTopMerchants();
+      };
+    });
+  }
+  
+  const targetMonth = merchantSelectedMonth || state.cursor;
+  const rows = getMonthData(targetMonth);
+  
   if (!rows.length) {
     box.innerHTML = '<div style="text-align:center;color:var(--ink-soft);padding:20px;font-size:13px;">Nenhuma despesa neste mês.</div>';
     $('merchantCount').textContent = '';
@@ -3734,96 +3844,77 @@ function renderTopMerchants() {
   
   const total = sumv(rows);
   
-  // Group current month by merchant
   const byMerchant = {};
   rows.forEach(t => {
-    const key = normalizeMerchant(t.description);
-    if (!byMerchant[key]) byMerchant[key] = { amount: 0, count: 0, original: t.description || 'Sem descrição' };
+    const key = normalizeMerchant(t.description, t.category);
+    if (!byMerchant[key]) byMerchant[key] = { amount: 0, count: 0, original: t.description || catById(t.category).label, category: t.category };
     byMerchant[key].amount += t.amount;
     byMerchant[key].count++;
-    // Keep the best-looking original name (longest)
     if ((t.description || '').length > byMerchant[key].original.length) {
       byMerchant[key].original = t.description;
     }
   });
   
-  // Get previous month data for comparison
-  const prev = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - 1, 1);
-  const prevYm = prev.getFullYear() + '-' + String(prev.getMonth() + 1).padStart(2, '0');
-  const prevRows = confirmedTxList().filter(t => t.date.slice(0, 7) === prevYm && t.type === 'out');
+  const grouped = groupMerchants(byMerchant);
   
-  let prevFilter;
-  if (state.view === 'casa') {
-    prevFilter = prevRows.filter(t => t.space === 'casa');
-  } else if (state.view === 'pessoais') {
-    prevFilter = prevRows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
-  } else {
-    prevFilter = prevRows.filter(t => t.user_id === state.me.id);
-  }
-  
+  const prevMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() - 1, 1);
+  const prevRows = getMonthData(prevMonth);
   const prevByMerchant = {};
-  prevFilter.forEach(t => {
-    const key = normalizeMerchant(t.description);
+  prevRows.forEach(t => {
+    const key = normalizeMerchant(t.description, t.category);
     if (!prevByMerchant[key]) prevByMerchant[key] = { amount: 0, count: 0 };
     prevByMerchant[key].amount += t.amount;
     prevByMerchant[key].count++;
   });
   
-  // Sort by amount desc, top 10
-  const sorted = Object.entries(byMerchant)
-    .sort((a, b) => b[1].amount - a[1].amount)
-    .slice(0, 10);
+  const sorted = Object.entries(grouped).sort((a, b) => b[1].amount - a[1].amount).slice(0, 10);
   
   $('merchantCount').textContent = sorted.length + ' maiores';
   
   let html = '<div class="merchant-list">';
   sorted.forEach(([key, data], i) => {
     const pct = total > 0 ? (data.amount / total * 100) : 0;
-    const prev = prevByMerchant[key];
     
-    // Clean display name (capitalize first letter of each word)
+    let prevAmt = 0;
+    let foundPrev = false;
+    (data.keys || [key]).forEach(k => {
+      if (prevByMerchant[k]) { prevAmt += prevByMerchant[k].amount; foundPrev = true; }
+    });
+    
     let displayName = data.original;
-    // Remove installment suffix from display too
     displayName = displayName.replace(/\s*[-–]\s*Parc\.?\s*\d+\/\d+/gi, '').trim();
+    if (!displayName) displayName = catById(data.category).label;
     
-    // Comparison badge
     let badge = '';
-    if (prev) {
-      const diff = ((data.amount - prev.amount) / prev.amount * 100);
-      if (Math.abs(diff) < 1) {
-        badge = '<span class="merchant-badge same">= igual</span>';
-      } else if (diff > 0) {
-        badge = '<span class="merchant-badge up">↑' + Math.round(diff) + '%</span>';
-      } else {
-        badge = '<span class="merchant-badge down">↓' + Math.abs(Math.round(diff)) + '%</span>';
-      }
+    if (foundPrev) {
+      const diff = prevAmt > 0 ? ((data.amount - prevAmt) / prevAmt * 100) : 0;
+      if (Math.abs(diff) < 1) badge = '<span class="merchant-badge same">= igual</span>';
+      else if (diff > 0) badge = '<span class="merchant-badge up">↑' + Math.round(diff) + '%</span>';
+      else badge = '<span class="merchant-badge down">↓' + Math.abs(Math.round(diff)) + '%</span>';
     } else {
       badge = '<span class="merchant-badge new">NOVO</span>';
     }
     
-    // Recurrence icon
-    const isRecurring = prev ? ' 🔄' : '';
+    const recurIcon = foundPrev ? ' 🔄' : '';
     
-    html += '<div class="merchant-row">';
+    html += `<div class="merchant-row" style="cursor:pointer;" onclick="filterByMerchant('${esc(displayName).replace(/'/g, "\'")}')">`;
     html += '  <div class="merchant-top">';
-    html += '    <div class="merchant-name"><span class="merchant-rank">' + (i + 1) + '</span>' + esc(displayName) + isRecurring + '</div>';
-    html += '    <div class="merchant-amount">R$ ' + fmt(data.amount) + '</div>';
+    html += `    <div class="merchant-name"><span class="merchant-rank">${i + 1}</span>${esc(displayName)}${recurIcon}</div>`;
+    html += `    <div class="merchant-amount">R$ ${fmt(data.amount)}</div>`;
     html += '  </div>';
     html += '  <div class="merchant-meta">';
-    html += '    <span>' + data.count + 'x este mês</span>';
-    html += '    <span>·</span>';
-    html += '    <span>' + pct.toFixed(0) + '% do total</span>';
-    html += '    ' + badge;
+    html += `    <span>${data.count}x</span><span>·</span>`;
+    html += `    <span>${pct.toFixed(0)}% do total</span>`;
+    html += `    ${badge}`;
     html += '  </div>';
-    html += '  <div class="merchant-bar"><div class="merchant-bar-fill" style="width:' + pct + '%"></div></div>';
+    html += `  <div class="merchant-bar"><div class="merchant-bar-fill" style="width:${pct}%"></div></div>`;
     html += '</div>';
   });
   
   html += '</div>';
-  html += '<div class="merchant-summary">Top ' + sorted.length + ' · Total R$ ' + fmt(total) + '</div>';
+  html += `<div class="merchant-summary">Top ${sorted.length} · Total R$ ${fmt(total)}</div>`;
   box.innerHTML = html;
 }
-
 
 function renderAll(){
   renderMonth();
