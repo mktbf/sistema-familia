@@ -3794,19 +3794,9 @@ function groupMerchants(byMerchant) {
   return merged;
 }
 
-let merchantSelectedMonth = null;
-
-function getMonthData(cursor) {
-  let rows = confirmedTxList().filter(t => t.type === 'out');
-  if (cursor !== 'geral') {
-    const ym = cursor.getFullYear() + '-' + String(cursor.getMonth() + 1).padStart(2, '0');
-    rows = rows.filter(t => t.date.slice(0, 7) === ym);
-  }
-  if (state.view === 'casa') rows = rows.filter(t => t.space === 'casa');
-  else if (state.view === 'pessoais') rows = rows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
-  else rows = rows.filter(t => t.user_id === state.me.id);
-  return rows;
-}
+// State for merchant month selection
+let merchantSelectedMonths = new Set();
+// Initialize later during first render
 
 function filterByMerchant(merchantName) {
   const searchInput = $('searchInput');
@@ -3833,36 +3823,61 @@ function renderTopMerchants() {
   const box = $('topMerchants');
   if (!box) return;
   
+  // Initialize default selection to current cursor month if empty
+  if (merchantSelectedMonths.size === 0) {
+    const initYm = state.cursor.getFullYear() + '-' + String(state.cursor.getMonth() + 1).padStart(2, '0');
+    merchantSelectedMonths.add(initYm);
+  }
+  
   const monthBox = $('merchantMonths');
   if (monthBox) {
-    const now = new Date();
-    let chips = `<button class="filter-chip${merchantSelectedMonth === 'geral' ? ' active' : ''}" data-mi="geral" style="text-transform:capitalize;">Geral</button>`;
+    let chips = `<button class="filter-chip${merchantSelectedMonths.has('geral') ? ' active' : ''}" data-mi="geral" style="text-transform:capitalize;">Geral</button>`;
     for (let i = 0; i < 6; i++) {
       const d = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - i, 1);
+      const ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
       const label = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
-      const isSel = (!merchantSelectedMonth && i === 0) || 
-                    (merchantSelectedMonth !== 'geral' && merchantSelectedMonth && merchantSelectedMonth.getMonth() === d.getMonth() && merchantSelectedMonth.getFullYear() === d.getFullYear());
-      chips += `<button class="filter-chip${isSel ? ' active' : ''}" data-mi="${i}" style="text-transform:capitalize;">${label}</button>`;
+      const isSel = merchantSelectedMonths.has(ym);
+      chips += `<button class="filter-chip${isSel ? ' active' : ''}" data-ym="${ym}" style="text-transform:capitalize;">${label}</button>`;
     }
     monthBox.innerHTML = chips;
+    
     monthBox.querySelectorAll('button').forEach(btn => {
       btn.onclick = () => {
-        const mi = btn.dataset.mi;
-        if (mi === 'geral') {
-          merchantSelectedMonth = 'geral';
+        const ym = btn.dataset.ym;
+        const geral = btn.dataset.mi === 'geral';
+        
+        if (geral) {
+          merchantSelectedMonths.clear();
+          merchantSelectedMonths.add('geral');
         } else {
-          merchantSelectedMonth = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - parseInt(mi), 1);
+          if (merchantSelectedMonths.has('geral')) {
+            merchantSelectedMonths.clear();
+          }
+          if (merchantSelectedMonths.has(ym)) {
+            merchantSelectedMonths.delete(ym);
+            if (merchantSelectedMonths.size === 0) {
+              merchantSelectedMonths.add('geral');
+            }
+          } else {
+            merchantSelectedMonths.add(ym);
+          }
         }
         renderTopMerchants();
       };
     });
   }
   
-  const targetMonth = merchantSelectedMonth || state.cursor;
-  const rows = getMonthData(targetMonth);
+  // Get rows based on selected months
+  let rows = confirmedTxList().filter(t => t.type === 'out');
+  if (!merchantSelectedMonths.has('geral')) {
+    rows = rows.filter(t => merchantSelectedMonths.has(t.date.slice(0, 7)));
+  }
+  if (state.view === 'casa') rows = rows.filter(t => t.space === 'casa');
+  else if (state.view === 'pessoais') rows = rows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
+  else rows = rows.filter(t => t.user_id === state.me.id);
   
   if (!rows.length) {
-    box.innerHTML = '<div style="text-align:center;color:var(--ink-soft);padding:20px;font-size:13px;">Nenhuma despesa neste mês.</div>';
+    box.innerHTML = '<div style="text-align:center;color:var(--ink-soft);padding:20px;font-size:13px;">Nenhuma despesa no período.</div>';
     $('merchantCount').textContent = '';
     return;
   }
@@ -3882,15 +3897,28 @@ function renderTopMerchants() {
   
   const grouped = groupMerchants(byMerchant);
   
-  const prevMonth = targetMonth === 'geral' ? null : new Date(targetMonth.getFullYear(), targetMonth.getMonth() - 1, 1);
-  const prevRows = prevMonth ? getMonthData(prevMonth) : [];
-  const prevByMerchant = {};
-  prevRows.forEach(t => {
-    const key = normalizeMerchant(t.description, t.category);
-    if (!prevByMerchant[key]) prevByMerchant[key] = { amount: 0, count: 0 };
-    prevByMerchant[key].amount += t.amount;
-    prevByMerchant[key].count++;
-  });
+  // Determine if we show comparison badges (only if exactly 1 specific month is selected)
+  const isSingleMonth = merchantSelectedMonths.size === 1 && !merchantSelectedMonths.has('geral');
+  let prevByMerchant = {};
+  
+  if (isSingleMonth) {
+    const selYm = Array.from(merchantSelectedMonths)[0];
+    const [yy, mm] = selYm.split('-');
+    const prevD = new Date(parseInt(yy), parseInt(mm) - 2, 1);
+    const prevYm = prevD.getFullYear() + '-' + String(prevD.getMonth() + 1).padStart(2, '0');
+    
+    let prevRows = confirmedTxList().filter(t => t.type === 'out' && t.date.slice(0, 7) === prevYm);
+    if (state.view === 'casa') prevRows = prevRows.filter(t => t.space === 'casa');
+    else if (state.view === 'pessoais') prevRows = prevRows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
+    else prevRows = prevRows.filter(t => t.user_id === state.me.id);
+    
+    prevRows.forEach(t => {
+      const key = normalizeMerchant(t.description, t.category);
+      if (!prevByMerchant[key]) prevByMerchant[key] = { amount: 0, count: 0 };
+      prevByMerchant[key].amount += t.amount;
+      prevByMerchant[key].count++;
+    });
+  }
   
   const sorted = Object.entries(grouped).sort((a, b) => b[1].amount - a[1].amount).slice(0, 10);
   
@@ -3902,9 +3930,11 @@ function renderTopMerchants() {
     
     let prevAmt = 0;
     let foundPrev = false;
-    (data.keys || [key]).forEach(k => {
-      if (prevByMerchant[k]) { prevAmt += prevByMerchant[k].amount; foundPrev = true; }
-    });
+    if (isSingleMonth) {
+      (data.keys || [key]).forEach(k => {
+        if (prevByMerchant[k]) { prevAmt += prevByMerchant[k].amount; foundPrev = true; }
+      });
+    }
     
     let displayName = data.original;
     displayName = displayName.replace(/\s*[-–]\s*Parc\.?\s*\d+\/\d+/gi, '').trim();
@@ -3912,21 +3942,18 @@ function renderTopMerchants() {
     
     let badge = '';
     let recurIcon = '';
-    if (merchantSelectedMonth !== 'geral') {
+    
+    if (isSingleMonth) {
       if (foundPrev) {
         const diff = prevAmt > 0 ? ((data.amount - prevAmt) / prevAmt * 100) : 0;
         if (Math.abs(diff) < 1) badge = '<span class="merchant-badge same">= igual</span>';
         else if (diff > 0) badge = '<span class="merchant-badge up">↑' + Math.round(diff) + '%</span>';
         else badge = '<span class="merchant-badge down">↓' + Math.abs(Math.round(diff)) + '%</span>';
-        
-        // Beautiful clean SVG for recurrence
         recurIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;color:var(--primary);margin-left:6px;vertical-align:middle;opacity:0.8;"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>`;
       } else {
         badge = '<span class="merchant-badge new">NOVO</span>';
       }
     }
-    
-    
     
     html += `<div class="merchant-row" style="cursor:pointer;" onclick="filterByMerchant('${esc(displayName).replace(/'/g, "\'")}')">`;
     html += '  <div class="merchant-top">';
