@@ -2837,6 +2837,7 @@
     </div>
     <div class="field-row">
       <input class="text" id="inDesc" placeholder="Descrição (opcional)" autocomplete="off">
+      <div id="aiSuggestion" style="font-size:12px; font-weight:600; color:var(--primary); margin-top:6px; display:none; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg> <span></span></div>
     </div>
     <div class="field-row" id="installmentRow" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px; color:var(--ink-soft); font-weight:600; user-select:none;">
@@ -5045,6 +5046,50 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('addRecurrenceBtn').onclick=addRecurrence;
   $('inAmount').addEventListener('keydown',e=>{if(e.key==='Enter')addTx();});
   $('inDesc').addEventListener('keydown',e=>{if(e.key==='Enter')addTx();});
+
+// AI Autocomplete Logic
+$('inDesc').addEventListener('input', e => {
+  if (state.editingId) return; // Only suggest for new transactions
+  const val = e.target.value.trim();
+  const sug = $('aiSuggestion');
+  if (val.length < 3) {
+    sug.style.display = 'none';
+    return;
+  }
+  
+  const kw = extractKeywords(val);
+  if (!kw.length) return;
+  
+  const txs = confirmedTxList().filter(t => t.type === 'out' && t.description);
+  const catScores = {};
+  
+  txs.forEach(t => {
+     const tKw = extractKeywords(t.description);
+     const matches = kw.filter(w => tKw.includes(w));
+     if (matches.length > 0) {
+       catScores[t.category] = (catScores[t.category] || 0) + matches.length;
+     }
+  });
+  
+  let best = null;
+  let max = 0;
+  for (let c in catScores) {
+     if (catScores[c] > max) { max = catScores[c]; best = c; }
+  }
+  
+  if (best && max > 0 && best !== state.cat) {
+     const catObj = catById(best);
+     if (catObj) {
+       state.cat = best;
+       renderChips();
+       sug.style.display = 'flex';
+       sug.querySelector('span').textContent = `IA sugeriu: ${catObj.label}`;
+       
+       // Hide after 3 seconds
+       setTimeout(() => { sug.style.display = 'none'; }, 3000);
+     }
+  }
+});
   
   // Parcelamento listeners
   $('installmentToggle').onchange = () => {
