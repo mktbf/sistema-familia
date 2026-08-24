@@ -4625,6 +4625,8 @@ async function boot(){
   $('inDate').value=new Date().toISOString().slice(0,10);
   $('currentUser').textContent=state.me.name;
   loadBudgets();loadRecurrences();loadGoals();
+  renderViewTabs();
+  renderPayerChips();
   renderAll();
   renderForm();
   renderChips();
