@@ -1,5 +1,5 @@
 // Service Worker — CasaCa$h PWA
-const CACHE_NAME = 'casacash-v15';
+const CACHE_NAME = 'casacash-v16';
 const ASSETS = [
   '/',
   '/index.html',

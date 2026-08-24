@@ -3793,8 +3793,11 @@ function groupMerchants(byMerchant) {
 let merchantSelectedMonth = null;
 
 function getMonthData(cursor) {
-  const ym = cursor.getFullYear() + '-' + String(cursor.getMonth() + 1).padStart(2, '0');
-  let rows = confirmedTxList().filter(t => t.date.slice(0, 7) === ym && t.type === 'out');
+  let rows = confirmedTxList().filter(t => t.type === 'out');
+  if (cursor !== 'geral') {
+    const ym = cursor.getFullYear() + '-' + String(cursor.getMonth() + 1).padStart(2, '0');
+    rows = rows.filter(t => t.date.slice(0, 7) === ym);
+  }
   if (state.view === 'casa') rows = rows.filter(t => t.space === 'casa');
   else if (state.view === 'pessoais') rows = rows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
   else rows = rows.filter(t => t.user_id === state.me.id);
@@ -3829,19 +3832,23 @@ function renderTopMerchants() {
   const monthBox = $('merchantMonths');
   if (monthBox) {
     const now = new Date();
-    let chips = '';
+    let chips = `<button class="filter-chip${merchantSelectedMonth === 'geral' ? ' active' : ''}" data-mi="geral" style="text-transform:capitalize;">Geral</button>`;
     for (let i = 0; i < 6; i++) {
       const d = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - i, 1);
       const label = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
       const isSel = (!merchantSelectedMonth && i === 0) || 
-                    (merchantSelectedMonth && merchantSelectedMonth.getMonth() === d.getMonth() && merchantSelectedMonth.getFullYear() === d.getFullYear());
+                    (merchantSelectedMonth !== 'geral' && merchantSelectedMonth && merchantSelectedMonth.getMonth() === d.getMonth() && merchantSelectedMonth.getFullYear() === d.getFullYear());
       chips += `<button class="filter-chip${isSel ? ' active' : ''}" data-mi="${i}" style="text-transform:capitalize;">${label}</button>`;
     }
     monthBox.innerHTML = chips;
     monthBox.querySelectorAll('button').forEach(btn => {
       btn.onclick = () => {
-        const mi = parseInt(btn.dataset.mi);
-        merchantSelectedMonth = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - mi, 1);
+        const mi = btn.dataset.mi;
+        if (mi === 'geral') {
+          merchantSelectedMonth = 'geral';
+        } else {
+          merchantSelectedMonth = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - parseInt(mi), 1);
+        }
         renderTopMerchants();
       };
     });
@@ -3871,8 +3878,8 @@ function renderTopMerchants() {
   
   const grouped = groupMerchants(byMerchant);
   
-  const prevMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() - 1, 1);
-  const prevRows = getMonthData(prevMonth);
+  const prevMonth = targetMonth === 'geral' ? null : new Date(targetMonth.getFullYear(), targetMonth.getMonth() - 1, 1);
+  const prevRows = prevMonth ? getMonthData(prevMonth) : [];
   const prevByMerchant = {};
   prevRows.forEach(t => {
     const key = normalizeMerchant(t.description, t.category);
@@ -3909,11 +3916,11 @@ function renderTopMerchants() {
       badge = '<span class="merchant-badge new">NOVO</span>';
     }
     
-    const recurIcon = foundPrev ? ' 🔄' : '';
+    
     
     html += `<div class="merchant-row" style="cursor:pointer;" onclick="filterByMerchant('${esc(displayName).replace(/'/g, "\'")}')">`;
     html += '  <div class="merchant-top">';
-    html += `    <div class="merchant-name"><span class="merchant-rank">${i + 1}</span>${esc(displayName)}${recurIcon}</div>`;
+    html += `    <div class="merchant-name"><span class="merchant-rank">${i + 1}</span>${esc(displayName)}</div>`;
     html += `    <div class="merchant-amount">R$ ${fmt(data.amount)}</div>`;
     html += '  </div>';
     html += '  <div class="merchant-meta">';
