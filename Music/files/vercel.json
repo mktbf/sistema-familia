@@ -1,1 +1,4 @@
-﻿{"buildCommand": "echo \"Ready\"", "outputDirectory": "."}
+{
+  "buildCommand": "echo Ready",
+  "outputDirectory": "."
+}
