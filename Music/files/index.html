@@ -2735,25 +2735,31 @@
     </button>
   </div>
 
-<section class="card reveal" style="animation-delay:.16s">
-    <h2 id="listTitle">Lançamentos <span class="hint" id="listCount"></span>
+<section class="card reveal" id="listSection" style="animation-delay:.16s">
+    <h2 id="listTitle" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg id="listChevron" class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px;transition:transform 0.3s;transform:rotate(-90deg);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        Lançamentos <span class="hint" id="listCount"></span>
+      </div>
       <button style="border:0;background:none;cursor:pointer;color:var(--ink-soft);padding:4px;border-radius:8px;transition:all .15s" id="exportBtn" title="Exportar CSV">
         <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       </button>
     </h2>
-    <div class="search-bar" id="searchBar">
-      <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px;color:var(--ink-soft);flex-shrink:0"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" id="searchInput" placeholder="Buscar lançamentos..." autocomplete="off">
-      <button class="clear-search" id="clearSearch">
-        <svg class="svg-icon" viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
+    <div id="listCollapsible" style="display:none; margin-top: 16px;">
+      <div class="search-bar" id="searchBar">
+        <svg class="svg-icon" viewBox="0 0 24 24" style="width:16px;height:16px;color:var(--ink-soft);flex-shrink:0"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Buscar lançamentos..." autocomplete="off">
+        <button class="clear-search" id="clearSearch">
+          <svg class="svg-icon" viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="filter-chips" id="filterChips">
+        <button class="filter-chip active" data-filter="all">Todos</button>
+        <button class="filter-chip" data-filter="out">Despesas</button>
+        <button class="filter-chip" data-filter="in">Receitas</button>
+      </div>
+      <div class="list" id="list"></div>
     </div>
-    <div class="filter-chips" id="filterChips">
-      <button class="filter-chip active" data-filter="all">Todos</button>
-      <button class="filter-chip" data-filter="out">Despesas</button>
-      <button class="filter-chip" data-filter="in">Receitas</button>
-    </div>
-    <div class="list" id="list"></div>
   </section>
 
   <section id="formSection" class="card reveal hidden" style="animation-delay:.06s; margin-bottom:24px;">
@@ -4665,6 +4671,15 @@ window.addEventListener('DOMContentLoaded',async()=>{
   
   
   // listeners busca e filtro
+  $('listTitle').onclick = (e) => {
+    if(e.target.closest('#exportBtn')) return;
+    const content = $('listCollapsible');
+    const chevron = $('listChevron');
+    const isHidden = content.style.display === 'none';
+    
+    content.style.display = isHidden ? 'block' : 'none';
+    chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+  };
   let searchTimeout;
   $('searchInput').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
