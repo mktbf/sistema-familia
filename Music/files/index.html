@@ -3733,9 +3733,17 @@ function normalizeMerchant(desc, category) {
   return d || 'outros';
 }
 
+const SYNONYMS = {
+  'niver': 'aniversario',
+  'aniversário': 'aniversario',
+  'supermercado': 'mercado',
+  'assai': 'assaí'
+};
+
 function extractKeywords(text) {
   return text.toLowerCase().replace(/[^a-záàâãéèêíïóôõöúçñ\s]/gi, '').split(/\s+/)
-    .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+    .map(w => SYNONYMS[w] || w);
 }
 
 function similarityScore(a, b) {
@@ -3760,7 +3768,7 @@ function groupMerchants(byMerchant) {
     
     for (let j = i + 1; j < keys.length; j++) {
       if (used.has(keys[j])) continue;
-      if (similarityScore(keys[i], keys[j]) >= 0.5) {
+      if (similarityScore(keys[i], keys[j]) >= 0.66) {
         group.amount += byMerchant[keys[j]].amount;
         group.count += byMerchant[keys[j]].count;
         group.keys.push(keys[j]);
