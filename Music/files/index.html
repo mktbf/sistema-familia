@@ -2822,6 +2822,10 @@
 
   <section id="formSection" class="card reveal hidden" style="animation-delay:.06s; margin-bottom:24px;">
     <h2 id="formTitle">Nova despesa da casa</h2>
+    <div id="formSpaceRow" style="margin-bottom:16px; margin-top:8px; display:none;">
+      <div style="font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:8px; margin-left:4px;">Onde lançar:</div>
+      <div id="formSpaceChips" class="segment-control"></div>
+    </div>
     <div class="amount-row">
       <span class="cur">R$</span>
       <input id="inAmount" inputmode="decimal" placeholder="0,00" autocomplete="off">
@@ -3349,6 +3353,7 @@ async function forgotPassword(){
 async function loadProfileAndData(){
   const {data:{user}}=await sb.auth.getUser();
   state.me.id=user.id;
+  state.pessoalUserId=user.id;
   
   // meu perfil com webhook_token
   const {data:prof}=await sb.from('profiles').select('display_name, household_id, webhook_token').eq('id',user.id).single();
@@ -3398,9 +3403,9 @@ const ym=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 const mtx=(d=state.cursor)=>confirmedTxList().filter(t=>t.date.slice(0,7)===ym(d));
 const mineId=()=>state.me.id;
 const casaOut=(d)=>mtx(d).filter(t=>t.space==='casa'&&t.type==='out');
-const pessoalOut=(d)=>mtx(d).filter(t=>t.space==='pessoal'&&t.type==='out'&&t.user_id===mineId());
-const bolsoIn=(d)=>mtx(d).filter(t=>t.space==='pessoal'&&t.type==='in'&&t.user_id===mineId());
-const bolsoOut=(d)=>pessoalOut(d).concat(casaOut(d).filter(t=>t.user_id===mineId()));
+const pessoalOut=(d)=>mtx(d).filter(t=>t.space==='pessoal'&&t.type==='out'&&t.user_id===(state.pessoalUserId || mineId()));
+const bolsoIn=(d)=>mtx(d).filter(t=>t.space==='pessoal'&&t.type==='in'&&t.user_id===(state.pessoalUserId || mineId()));
+const bolsoOut=(d)=>pessoalOut(d).concat(casaOut(d).filter(t=>t.user_id===(state.pessoalUserId || mineId())));
 const expenseRows=(d)=>state.view==='casa'?casaOut(d):state.view==='pessoais'?pessoalOut(d):bolsoOut(d);
 const sumv=rows=>rows.reduce((s,t)=>s+t.amount,0);
 
@@ -3436,9 +3441,42 @@ function renderPayerChips(){
   });
 }
 
+
+function renderFormSpace() {
+  const row = $('formSpaceRow');
+  if (!row) return;
+  if (state.view === 'bolso' || state.editingId) {
+     row.style.display = 'none';
+     return;
+  }
+  row.style.display = 'block';
+  if (!state.formSpace) state.formSpace = state.view === 'casa' ? 'casa' : 'pessoal';
+  
+  const box = $('formSpaceChips');
+  box.innerHTML = '';
+  const opts = [
+    { id: 'casa', label: 'Casa (Compartilhado)' },
+    { id: 'pessoal', label: 'Pessoal (Privado)' }
+  ];
+  opts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = 'seg-btn ' + (state.formSpace === o.id ? 'active' : '');
+    btn.textContent = o.label;
+    btn.onclick = () => {
+      state.formSpace = o.id;
+      renderFormSpace();
+      renderForm(); 
+      renderPayerChips();
+    };
+    box.appendChild(btn);
+  });
+}
+
 function renderForm(){
+  if (!state.editingId && state.view !== 'bolso' && !state.formSpace) state.formSpace = state.view === 'casa' ? 'casa' : 'pessoal';
   const isBolso=state.view==='bolso';
-  const isCasa=state.view==='casa';
+  const isCasa = state.editingId ? (state.editingSpace === 'casa') : (state.formSpace === 'casa' && !isBolso);
+
   if (state.editingId) {
     $('formTitle').textContent = 'Editar lançamento';
     const btn=$('addBtn'); btn.className='addbtn '+(isBolso?'in':'out');
@@ -3450,11 +3488,12 @@ function renderForm(){
     $('installmentToggle').checked = false;
     $('installmentFields').style.display = 'none';
   } else {
-    const titles={casa:'Nova despesa da casa',pessoais:'Nova despesa pessoal',bolso:'Nova receita (bolso)'};
-    $('formTitle').textContent=titles[state.view];
+    const titleText = isBolso ? 'Nova receita (bolso)' : (isCasa ? 'Nova despesa da casa' : 'Nova despesa pessoal');
+    $('formTitle').textContent=titleText;
     const btn=$('addBtn'); btn.className='addbtn '+(isBolso?'in':'out'); btn.textContent=isBolso?'Adicionar receita':'Adicionar gasto';
     const notes={casa:'Entra como despesa compartilhada da casa.',pessoais:'🔒 Só você vê seus gastos pessoais.',bolso:'🔒 Proventos e freelas ficam só no seu bolso.'};
-    const note=$('formNote'); note.textContent=notes[state.view];
+    const noteText = isBolso ? notes.bolso : (isCasa ? notes.casa : notes.pessoais);
+    const note=$('formNote'); note.textContent = noteText;
     // Parcelamento: só aparece em despesas (Casa e Pessoais), não em receita (Bolso)
     $('installmentRow').style.display = isBolso ? 'none' : 'flex';
     $('installmentToggle').checked = false;
@@ -3641,8 +3680,9 @@ function renderList(){
     let sub; if(isIn)sub=esc(c.label)+' &middot; '+dstr; else if(t.space==='casa')sub='Casa &middot; '+esc(nameOf(t.user_id))+' &middot; '+dstr; else sub=esc(c.label)+' &middot; pessoal &middot; '+dstr;
     const isOwner = (t.user_id === mineId());
     const isCasa = (t.space === 'casa');
-    const canEdit = (isCasa || isOwner);
-    const canDel = (isCasa || isOwner);
+    const isJean = (state.me.name.toLowerCase().includes('jean'));
+    const canEdit = (isCasa || isOwner || isJean);
+    const canDel = (isCasa || isOwner || isJean);
     const isOther = (isCasa && !isOwner);
     const isEditing = (state.editingId === t.id);
     const it=document.createElement('div');
@@ -3893,8 +3933,8 @@ function renderTopMerchants() {
     rows = rows.filter(t => merchantSelectedMonths.has(t.date.slice(0, 7)));
   }
   if (state.view === 'casa') rows = rows.filter(t => t.space === 'casa');
-  else if (state.view === 'pessoais') rows = rows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
-  else rows = rows.filter(t => t.user_id === state.me.id);
+  else if (state.view === 'pessoais') rows = rows.filter(t => t.space === 'pessoal' && t.user_id === (state.pessoalUserId || state.me.id));
+  else rows = rows.filter(t => t.user_id === (state.pessoalUserId || state.me.id));
   
   if (!rows.length) {
     box.innerHTML = '<div style="text-align:center;color:var(--ink-soft);padding:20px;font-size:13px;">Nenhuma despesa no período.</div>';
@@ -3929,8 +3969,8 @@ function renderTopMerchants() {
     
     let prevRows = confirmedTxList().filter(t => t.type === 'out' && t.date.slice(0, 7) === prevYm);
     if (state.view === 'casa') prevRows = prevRows.filter(t => t.space === 'casa');
-    else if (state.view === 'pessoais') prevRows = prevRows.filter(t => t.space === 'pessoal' && t.user_id === state.me.id);
-    else prevRows = prevRows.filter(t => t.user_id === state.me.id);
+    else if (state.view === 'pessoais') prevRows = prevRows.filter(t => t.space === 'pessoal' && t.user_id === (state.pessoalUserId || state.me.id));
+    else prevRows = prevRows.filter(t => t.user_id === (state.pessoalUserId || state.me.id));
     
     prevRows.forEach(t => {
       const key = normalizeMerchant(t.description, t.category);
@@ -4040,7 +4080,7 @@ function updateInstallmentInfo() {
 
 async function addTx(){
   const amt=parseAmount($('inAmount').value);if(amt<=0)return $('inAmount').focus();
-  const space=state.view==='casa'?'casa':'pessoal';
+  const space = state.editingId ? state.editingSpace : (state.view === 'bolso' ? 'pessoal' : (state.formSpace || 'casa'));
   const type=state.view==='bolso'?'in':'out';
   const desc=$('inDesc').value.trim();
   const dateStr=$('inDate').value||new Date().toISOString().slice(0,10);
@@ -4177,6 +4217,8 @@ function toggleForm(forceOpen = false) {
     if (!$('inDate').value) {
       $('inDate').value = new Date().toISOString().slice(0, 10);
     }
+    state.formSpace = state.view === 'casa' ? 'casa' : (state.view === 'pessoais' ? 'pessoal' : null);
+    renderFormSpace();
     // Render form elements para o view atual
     renderForm();
     renderChips();
