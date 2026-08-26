@@ -3445,7 +3445,7 @@ function renderPayerChips(){
 function renderFormSpace() {
   const row = $('formSpaceRow');
   if (!row) return;
-  if (state.view === 'bolso' || state.editingId) {
+  if (state.view === 'bolso') {
      row.style.display = 'none';
      return;
   }
@@ -3475,14 +3475,14 @@ function renderFormSpace() {
 function renderForm(){
   if (!state.editingId && state.view !== 'bolso' && !state.formSpace) state.formSpace = state.view === 'casa' ? 'casa' : 'pessoal';
   const isBolso=state.view==='bolso';
-  const isCasa = state.editingId ? (state.editingSpace === 'casa') : (state.formSpace === 'casa' && !isBolso);
+  const isCasa = (state.formSpace === 'casa' && !isBolso);
 
   if (state.editingId) {
-    $('formTitle').textContent = 'Editar lançamento';
+    $('formTitle').textContent = isBolso ? 'Editar receita' : (isCasa ? 'Editar despesa da casa' : 'Editar despesa pessoal');
     const btn=$('addBtn'); btn.className='addbtn '+(isBolso?'in':'out');
     btn.textContent = 'Salvar alterações';
     const notes={casa:'Alterando despesa da casa.',pessoais:'🔒 Alterando despesa pessoal.',bolso:'🔒 Alterando receita do bolso.'};
-    const note=$('formNote'); note.textContent=notes[state.view];
+    const note=$('formNote'); note.textContent = isBolso ? notes.bolso : (isCasa ? notes.casa : notes.pessoais);
     // Esconder parcelamento no modo edição
     $('installmentRow').style.display = 'none';
     $('installmentToggle').checked = false;
@@ -4099,7 +4099,7 @@ function updateInstallmentInfo() {
 
 async function addTx(){
   const amt=parseAmount($('inAmount').value);if(amt<=0)return $('inAmount').focus();
-  const space = state.editingId ? state.editingSpace : (state.view === 'bolso' ? 'pessoal' : (state.formSpace || 'casa'));
+  const space = state.view === 'bolso' ? 'pessoal' : (state.formSpace || 'casa');
   const type=state.view==='bolso'?'in':'out';
   const desc=$('inDesc').value.trim();
   const dateStr=$('inDate').value||new Date().toISOString().slice(0,10);
@@ -4114,9 +4114,8 @@ async function addTx(){
     const updatePayload = {
       space, type, amount: amt, category: state.cat, description: desc, occurred_on: dateStr
     };
-    if (space === 'casa') {
-      updatePayload.user_id = payerId;
-    }
+    // always allow changing owner based on payerId context (especially if admin)
+    updatePayload.user_id = payerId;
     try {
       const { data, error } = await sb.from('transactions').update(updatePayload).eq('id', state.editingId).select();
       $('addBtn').disabled=false;
