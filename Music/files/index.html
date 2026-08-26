@@ -3570,6 +3570,25 @@ function renderHero(){
         const v=byUser[uid]||0;const el=document.createElement('div');
         el.className='p';el.innerHTML=`<div class="n">${esc(nameOf(uid))} pagou</div><div class="v num">R$ ${fmt0(v)}</div>`;pbox.appendChild(el);
       });
+    } else if(state.view==='pessoais') {
+      const ids=Object.keys(state.members);
+      if(ids.length > 0) {
+        if (!state.pessoalUserId) state.pessoalUserId = state.me.id;
+        const sel = document.createElement('div');
+        sel.className = 'segment-control';
+        sel.style.background = 'rgba(255,255,255,0.1)';
+        sel.style.borderColor = 'rgba(255,255,255,0.2)';
+        sel.style.marginTop = '12px';
+        ids.forEach(uid => {
+          const btn = document.createElement('button');
+          btn.className = 'seg-btn ' + (state.pessoalUserId === uid ? 'active' : '');
+          btn.style.color = '#fff';
+          btn.textContent = state.members[uid].split(' ')[0];
+          btn.onclick = () => { state.pessoalUserId = uid; renderAll(); };
+          sel.appendChild(btn);
+        });
+        pbox.appendChild(sel);
+      }
     }
   }
 }
