@@ -3550,6 +3550,152 @@ async function delCat(c){
   showToast(`Categoria deletada.`, 'success');
 }
 
+function updatePendingBanner(){
+  const pendings = state.tx.filter(t => t.pending === true && t.user_id === mineId());
+  const banner = $('pendingBanner');
+  if (pendings.length > 0) {
+    $('pendingCount').textContent = pendings.length;
+    banner.classList.remove('hidden');
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+function openPendingReview() {
+  const pendings = state.tx.filter(t => t.pending === true && t.user_id === mineId());
+  renderPendingList(pendings);
+  $('pendingModal').classList.remove('hidden');
+}
+
+function closePendingReview() {
+  $('pendingModal').classList.add('hidden');
+}
+
+function renderPendingList(items) {
+  const box = $('pendingList');
+  if (items.length === 0) {
+    box.innerHTML = '<div style="text-align:center; padding:30px; color:var(--ink-soft);">Nenhum gasto pendente. Bom trabalho!</div>';
+    setTimeout(closePendingReview, 800);
+    return;
+  }
+  box.innerHTML = '';
+  items.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'pending-card';
+    card.id = `pending-card-${t.id}`;
+    
+    const d = new Date(t.date+'T12:00:00');
+    const dstr = d.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
+    
+    const isIncome = t.type === 'in';
+    const cats = isIncome ? INCOME_CATS : debitCats();
+    
+    // IA: sugerir categoria com base na descrição
+    const suggestedCat = autoCategorize(t.description || '');
+    
+    let catOpts = '';
+    cats.forEach(c => {
+      catOpts += `<option value="${c.id}"${c.id === suggestedCat ? ' selected' : ''}>${esc(c.label)}</option>`;
+    });
+    
+    card.innerHTML = `
+      <div class="card-row-top">
+        <div class="title">${esc(t.description || (isIncome ? 'Receita importada' : 'Gasto importado'))}</div>
+        <div class="val num" style="color: ${isIncome ? 'var(--in)' : 'var(--ink)'}">
+          ${isIncome ? '+ ' : ''}R$ ${fmt(t.amount)}
+        </div>
+      </div>
+      <div class="card-row-bottom">
+        <div class="meta-info">
+          <span class="sub">${isIncome ? 'Recebimento' : 'Importado'} em ${dstr}</span>
+        </div>
+        <div class="controls">
+          <select class="cat-select" data-tid="${t.id}">${catOpts}</select>
+          <div class="actions">
+            ${isIncome ? '' : '<button class="btn-casa">Casa</button>'}
+            <button class="btn-pess">${isIncome ? 'Receber no Bolso' : 'Pessoal'}</button>
+            <button class="btn-discard" title="Descartar">✕</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    const getCat = () => card.querySelector('.cat-select').value;
+    if (!isIncome) {
+      card.querySelector('.btn-casa').onclick = () => classifyTx(t.id, 'casa', getCat());
+    }
+    card.querySelector('.btn-pess').onclick = () => classifyTx(t.id, 'pessoal', getCat());
+    card.querySelector('.btn-discard').onclick = () => discardPendingTx(t.id);
+    
+    box.appendChild(card);
+  });
+}
+
+async function classifyTx(id, space, category) {
+  // Efeito visual sênior: remove o item suavemente antes de atualizar
+  const card = $(`pending-card-${id}`);
+  if (card) card.classList.add('removing');
+
+  const updateObj = {space, pending: false};
+  if (category) updateObj.category = category;
+  const {error} = await sb.from('transactions').update(updateObj).eq('id', id);
+  if (error) {
+    showToast('Erro ao classificar: ' + error.message, 'error');
+    if (card) card.classList.remove('removing');
+    return;
+  }
+  
+  showToast('Gasto classificado!', 'success');
+  
+  // Atualiza cache local e renderiza de novo
+  setTimeout(async () => {
+    await loadTx();
+    renderAll();
+    updatePendingBanner();
+    const pendings = state.tx.filter(t => t.pending === true);
+    renderPendingList(pendings);
+  }, 250);
+}
+
+async function discardPendingTx(id) {
+  if (!confirm('Deseja descartar (excluir) este gasto pendente?')) return;
+  const card = $(`pending-card-${id}`);
+  if (card) card.classList.add('removing');
+
+  const {error} = await sb.from('transactions').delete().eq('id', id);
+  if (error) {
+    showToast('Erro ao descartar', 'error');
+    if (card) card.classList.remove('removing');
+    return;
+  }
+  
+  showToast('Gasto descartado.', 'success');
+  
+  setTimeout(async () => {
+    await loadTx();
+    renderAll();
+    updatePendingBanner();
+    const pendings = state.tx.filter(t => t.pending === true);
+    renderPendingList(pendings);
+  }, 250);
+}
+
+function autoCategorize(desc){
+  const d=(desc||'').toLowerCase();
+  const rules=[
+    {k:['mercado','supermercado','atacadão','atacadao','assaí','assai','hortifruti','sacolão','sacolao','carrefour','pão de açúcar','pao de acucar','extra hiper','big bompreço','big bompreco','sam s club','sams club','mercadorama'],c:'mercado'},
+    {k:['restaurante','ifood','burger','pizza','lanche','padaria','café','cafe','mcdonald','subway','sushi','açaí','acai','boteco','bar ','rest ','habibs','bk ','outback','churrascaria'],c:'restaurante'},
+    {k:['uber','99 ','99app','combustível','combustivel','posto','gasolina','estacionamento','pedágio','pedagio','bilhete unico','metro ','onibus','brg*'],c:'transporte'},
+    {k:['aluguel','condomínio','condominio','energia','cemig','copasa','cpfl','enel','água','agua','internet','gás','gas','iptu','luz ','celesc','vivo','claro','tim ','oi ','net '],c:'casa'},
+    {k:['farmácia','farmacia','drogaria','hospital','clínica','clinica','médico','medico','dentista','raia','droga','unimed','amil','hapvida','laboratorio','exame'],c:'saude'},
+    {k:['criança','crianca','escola','brinquedo','fralda','bebê','bebe','infantil','creche','pampers'],c:'criancas'},
+    {k:['cinema','netflix','spotify','disney','hbo','prime video','ingresso','parque','viagem','hotel','game','steam','playstation','xbox','globoplay','teatro'],c:'lazer'},
+    {k:['amazon','mercado livre','shopee','magalu','americanas','aliexpress','shein','magazine','casas bahia','ponto frio','kabum','terabyte','loja','renner','c&a','riachuelo'],c:'compras'},
+  ];
+  for(const r of rules){if(r.k.some(w=>d.includes(w)))return r.c;}
+  return 'outros';
+}
+
 function renderMonth(){$('monthLbl').textContent=state.cursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});}
 
 function renderHero(){
@@ -4075,6 +4221,7 @@ function renderAll(){
   renderTrendChart();
   renderRecurrences();
   renderList();
+  updatePendingBanner();
 }
 
 /* =========================================================
@@ -4217,7 +4364,7 @@ async function removeTx(id){
   const {error}=await sb.from('transactions').update({deleted_at:new Date().toISOString()}).eq('id',id);
   if(error){showToast('Erro ao excluir', 'error');return;}
   showToast('Enviado para a Lixeira.', 'success');
-  await loadTx();renderAll();updateTrashBadge();
+  await loadTx();renderAll();updateTrashBadge();updatePendingBanner();
 }
 
 function toggleForm(forceOpen = false) {
@@ -5169,6 +5316,12 @@ $('inDesc').addEventListener('input', e => {
   
   
   
+  
+  // listeners pendências
+  $('btnReviewPending').onclick=openPendingReview;
+  $('pendingClose').onclick=closePendingReview;
+  $('pendingModal').onclick=e=>{if(e.target===$('pendingModal'))closePendingReview();};
+
   // listeners busca e filtro
   $('listTitle').onclick = (e) => {
     if(e.target.closest('#exportBtn')) return;
