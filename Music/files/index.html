@@ -2935,6 +2935,14 @@
   <p class="foot">CasaCa$h &middot; Seus dados ficam no seu Supabase.</p>
 </div>
 
+<div id="pendingBanner" class="hidden">
+    <span style="font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px">
+      <svg class="svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></svg>
+      Você tem <span id="pendingCount" style="font-weight:800">0</span> gasto(s) pendente(s) de classificação.
+    </span>
+    <button id="btnReviewPending">Revisar agora</button>
+  </div>
+
 <!-- ===================== MODAL: LIXEIRA ===================== -->
 <div id="trashModal" class="modal-overlay hidden">
   <div class="modal">
@@ -2949,6 +2957,22 @@
     </h2>
     <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">Itens excluídos nos últimos 30 dias. Depois disso, são apagados definitivamente.</p>
     <div id="trashList"></div>
+  </div>
+</div>
+
+<div id="pendingModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>
+      <span style="display:flex;align-items:center;gap:8px">
+        <svg class="svg-icon" viewBox="0 0 24 24" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></svg>
+        Classificar Novos Gastos
+      </span>
+      <button class="close" id="pendingClose">
+        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </h2>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px">Estes gastos foram importados do seu Nubank / Apple Pay. Selecione onde registrá-los:</p>
+    <div id="pendingList"></div>
   </div>
 </div>
 
@@ -3554,6 +3578,7 @@ async function delCat(c){
 function updatePendingBanner(){
   const pendings = state.tx.filter(t => t.pending === true);
   const banner = $('pendingBanner');
+  if (!banner) return;
   if (pendings.length > 0) {
     $('pendingCount').textContent = pendings.length;
     banner.classList.remove('hidden');
