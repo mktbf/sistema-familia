@@ -3392,7 +3392,8 @@ async function loadTx(){
     category:r.category,
     description:r.description,
     date:r.occurred_on,
-    pending:!!r.pending
+    pending:!!r.pending,
+    created_at:r.created_at
   }));
 }
 
@@ -3551,7 +3552,7 @@ async function delCat(c){
 }
 
 function updatePendingBanner(){
-  const pendings = state.tx.filter(t => t.pending === true && t.user_id === mineId());
+  const pendings = state.tx.filter(t => t.pending === true);
   const banner = $('pendingBanner');
   if (pendings.length > 0) {
     $('pendingCount').textContent = pendings.length;
@@ -3562,7 +3563,7 @@ function updatePendingBanner(){
 }
 
 function openPendingReview() {
-  const pendings = state.tx.filter(t => t.pending === true && t.user_id === mineId());
+  const pendings = state.tx.filter(t => t.pending === true);
   renderPendingList(pendings);
   $('pendingModal').classList.remove('hidden');
 }
@@ -3795,7 +3796,12 @@ function renderBreakdown(){
 
 function renderList(){
   let rows = state.view==='bolso' ? bolsoIn().concat(bolsoOut()) : expenseRows();
-  rows=rows.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  rows=rows.slice().sort((a,b)=>{
+    const dComp = b.date.localeCompare(a.date);
+    if(dComp !== 0) return dComp;
+    if(a.created_at && b.created_at) return b.created_at.localeCompare(a.created_at);
+    return 0;
+  });
   
   // Apply search filter
   if (state.searchQuery) {
