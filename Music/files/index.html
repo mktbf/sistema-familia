@@ -2775,6 +2775,15 @@
   </header>
 
   <!-- Fila de Pendentes Banner -->
+  <div id="pendingBanner" class="hidden">
+    <span style="font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px">
+      <svg class="svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></svg>
+      Você tem <span id="pendingCount" style="font-weight:800">0</span> gasto(s) pendente(s) de classificação.
+    </span>
+    <button id="btnReviewPending">Revisar agora</button>
+  </div>
+
+  <!-- Fila de Pendentes Banner -->
   <section class="hero reveal" style="animation-delay:.02s">
     <div class="cap" id="heroCap">Gasto da casa</div>
     <div class="total num"><small>R$</small><span id="heroBig">0</span></div>
@@ -2934,14 +2943,6 @@
   </section>
   <p class="foot">CasaCa$h &middot; Seus dados ficam no seu Supabase.</p>
 </div>
-
-<div id="pendingBanner" class="hidden">
-    <span style="font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px">
-      <svg class="svg-icon" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></svg>
-      Você tem <span id="pendingCount" style="font-weight:800">0</span> gasto(s) pendente(s) de classificação.
-    </span>
-    <button id="btnReviewPending">Revisar agora</button>
-  </div>
 
 <!-- ===================== MODAL: LIXEIRA ===================== -->
 <div id="trashModal" class="modal-overlay hidden">
