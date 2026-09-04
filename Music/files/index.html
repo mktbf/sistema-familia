@@ -3245,8 +3245,13 @@ initTheme();
 ========================================================= */
 function loadBudgets(){try{const s=localStorage.getItem('budgets_'+(state.me.household||'d'));if(s)state.budgets=JSON.parse(s);}catch(e){}}
 function saveBudgets(){localStorage.setItem('budgets_'+(state.me.household||'d'),JSON.stringify(state.budgets));}
-function loadRecurrences(){try{const s=localStorage.getItem('recurrences_'+(state.me.household||'d'));state.recurrences=s?JSON.parse(s):[];}catch(e){state.recurrences=[];}}
-function saveRecurrences(){localStorage.setItem('recurrences_'+(state.me.household||'d'),JSON.stringify(state.recurrences));}
+async function loadRecurrences(){
+  if(!state.me.household){state.recurrences=[];return;}
+  const {data}=await sb.from('transactions').select('*').is('deleted_at',null).eq('type','recurrence');
+  state.recurrences=(data||[]).map(t=>({id:t.id,description:t.description,amount:Number(t.amount),category:t.category,space:t.space,day:parseInt(t.date.split('-')[2])}));
+}
+function saveRecurrences(){}
+
 /* ----- GRÁFICO DE TENDÊNCIA 6 MESES ----- */
 function renderTrendChart(){
   const box=$('trendChart');if(!box)return;
@@ -3283,15 +3288,22 @@ function renderRecurrences(){
   pending.forEach((r,i)=>{h+=`<div class="recurrence-item"><span class="r-desc">${esc(r.description)}</span><span class="r-amt num">R$ ${fmt(r.amount)}</span><button class="r-action" data-ri="${i}">Lançar</button><button class="r-del" data-rd="${i}" title="Remover">✕</button></div>`;});
   h+=`</div>`;box.innerHTML=h;
   box.querySelectorAll('.r-action').forEach(btn=>{btn.onclick=async()=>{const r=pending[+btn.dataset.ri];btn.disabled=true;btn.textContent='...';const{error}=await sb.from('transactions').insert({household_id:state.me.household,user_id:state.me.id,space:r.space||'casa',type:'out',amount:r.amount,category:r.category||'casa',description:r.description,occurred_on:new Date().toISOString().slice(0,10),pending:false});if(error){showToast('Erro: '+error.message,'error');btn.disabled=false;btn.textContent='Lançar';return;}showToast(r.description+' lançado!','success');await loadTx();renderAll();};});
-  box.querySelectorAll('.r-del').forEach(btn=>{btn.onclick=()=>{const r=pending[+btn.dataset.rd];const idx=state.recurrences.indexOf(r);if(idx!==-1){state.recurrences.splice(idx,1);saveRecurrences();renderRecurrences();showToast('Removida.','success');}};});
+  box.querySelectorAll('.r-del').forEach(btn=>{btn.onclick=async()=>{const r=pending[+btn.dataset.rd]; if(r.id){await sb.from('transactions').delete().eq('id',r.id);await loadRecurrences();}else{const idx=state.recurrences.indexOf(r);if(idx!==-1)state.recurrences.splice(idx,1);} renderRecurrences(); if(state.filterType==='fixas') renderList(); showToast('Removida.','success');};});
 }
 /* ----- COLAR NOTIFICAÇÃO DO NUBANK ----- */
-function addRecurrence(){
+async function addRecurrence(){
+  if(!state.me.household)return;
   const desc=prompt('Nome da conta fixa (ex: Netflix, Aluguel):');if(!desc)return;
   const amtStr=prompt('Valor mensal (R$):');if(!amtStr)return;
   const amount=parseFloat(amtStr.replace(',','.'));if(!amount||amount<=0){showToast('Valor inválido.','error');return;}
-  state.recurrences.push({description:desc.trim(),amount,category:'casa',space:state.view==='pessoais'?'pessoal':'casa',day:new Date().getDate()});
-  saveRecurrences();renderRecurrences();showToast('Recorrência "'+desc+'" adicionada!','success');
+  const dd=String(new Date().getDate()).padStart(2,'0');
+  const rec={household_id:state.me.household,user_id:mineId(),type:'recurrence',description:desc.trim(),amount,category:'casa',space:state.view==='pessoais'?'pessoal':'casa',occurred_on:`2000-01-${dd}`};
+  const {error}=await sb.from('transactions').insert(rec);
+  if(error){showToast('Erro','error');return;}
+  await loadRecurrences();
+  if(state.filterType==='fixas') renderList();
+  renderRecurrences();
+  showToast('Conta fixa adicionada!','success');
 }
 
 /* ----- METAS DE ECONOMIA ----- */
@@ -3884,10 +3896,17 @@ function renderList(){
         delBtn.onclick = (e) => {
           e.stopPropagation();
           if(confirm(`Excluir a conta fixa "${r.description}"?`)) {
-            state.recurrences.splice(i, 1);
-            saveRecurrences();
-            renderList();
-            renderRecurrences();
+            const tgt = state.recurrences[i];
+            if(tgt.id) {
+              sb.from('transactions').delete().eq('id', tgt.id).then(async () => {
+                await loadRecurrences();
+                renderList();
+                renderRecurrences();
+              });
+            } else {
+              state.recurrences.splice(i,1);
+              renderList(); renderRecurrences();
+            }
           }
         };
       }
@@ -5299,7 +5318,34 @@ async function boot(){
   $('appLoading').classList.add('hidden');showApp();
   $('inDate').value=new Date().toISOString().slice(0,10);
   $('currentUser').textContent=state.me.name;
-  loadBudgets();loadRecurrences();
+  loadBudgets();await loadRecurrences();
+
+  // Migrar contas fixas antigas do localStorage para o Supabase
+  try {
+    const hId = state.me.household || 'd';
+    const s = localStorage.getItem('recurrences_' + hId);
+    if (s) {
+      const localRecs = JSON.parse(s);
+      if (localRecs.length > 0) {
+        for (let r of localRecs) {
+           const dd = String(r.day || 1).padStart(2, '0');
+           await sb.from('transactions').insert({
+             household_id: hId,
+             user_id: mineId(),
+             type: 'recurrence',
+             description: r.description,
+             amount: r.amount,
+             category: r.category || 'casa',
+             space: r.space || 'casa',
+             occurred_on: `2000-01-${dd}`
+           });
+        }
+        await loadRecurrences();
+      }
+      localStorage.removeItem('recurrences_' + hId);
+    }
+  } catch(e) { console.error('Migration error', e); }
+
   renderViewTabs();
   renderPayerChips();
   renderAll();
