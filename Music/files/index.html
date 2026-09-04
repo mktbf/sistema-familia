@@ -2824,6 +2824,7 @@
         <button class="filter-chip active" data-filter="all">Todos</button>
         <button class="filter-chip" data-filter="out">Despesas</button>
         <button class="filter-chip" data-filter="in">Receitas</button>
+        <button class="filter-chip" data-filter="fixas">Contas fixas</button>
       </div>
       <div class="list" id="list"></div>
     </div>
@@ -3823,10 +3824,11 @@ function renderBreakdown(){
 function renderList(){
   let rows = state.view==='bolso' ? bolsoIn().concat(bolsoOut()) : expenseRows();
   rows=rows.slice().sort((a,b)=>{
-    const dComp = b.date.localeCompare(a.date);
-    if(dComp !== 0) return dComp;
-    if(a.created_at && b.created_at) return b.created_at.localeCompare(a.created_at);
-    return 0;
+    if(a.created_at && b.created_at) {
+       const cComp = b.created_at.localeCompare(a.created_at);
+       if(cComp !== 0) return cComp;
+    }
+    return b.date.localeCompare(a.date);
   });
   
   // Apply search filter
@@ -3854,12 +3856,53 @@ function renderList(){
     window.currentMerchantFilter = null;
   }
   
+  // Handle Fixas view
+  if (state.filterType === 'fixas') {
+    $('listTitleText').textContent = 'Contas fixas cadastradas';
+    $('listCount').textContent = (state.recurrences ? state.recurrences.length : 0) + ' itens';
+    const box = $('list');
+    box.innerHTML = '';
+    if (!state.recurrences || !state.recurrences.length) {
+      box.innerHTML = `<div class="empty">Nenhuma conta fixa configurada.</div>`;
+      return;
+    }
+    state.recurrences.forEach((r, i) => {
+      const c = catById(r.category);
+      const it = document.createElement('div');
+      it.className = 'it';
+      it.innerHTML = `
+        <div class="badge" style="background:${c.color}">${esc(c.label[0].toUpperCase())}</div>
+        <div class="mid">
+          <div class="title">${esc(r.description)}</div>
+          <div class="sub">Cadastrado para todo dia ${r.day || 1} &middot; ${esc(c.label)}</div>
+        </div>
+        <div class="val num">R$ ${fmt(r.amount)}</div>
+        <div class="del" title="Excluir"><svg class="svg-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+      `;
+      const delBtn = it.querySelector('.del');
+      if(delBtn) {
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          if(confirm(`Excluir a conta fixa "${r.description}"?`)) {
+            state.recurrences.splice(i, 1);
+            saveRecurrences();
+            renderList();
+            renderRecurrences();
+          }
+        };
+      }
+      box.appendChild(it);
+    });
+    return;
+  }
+
   // Apply type filter
   if (state.filterType !== 'all') {
     rows = rows.filter(t => t.type === state.filterType);
   }
   
   $('listTitleText').textContent=state.view==='bolso'?'Entradas e saídas ':'Lançamentos ';
+
   $('listCount').textContent=rows.length?rows.length+(rows.length>1?' itens':' item'):'';
   const box=$('list');
   if(!rows.length){
